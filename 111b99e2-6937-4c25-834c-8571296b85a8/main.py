@@ -21,15 +21,15 @@ class TradingStrategy(Strategy):
     def run(self, data):
         for ticker in self.tickers:
             try:
-                ema9 = EMA(ticker, data["ohlcv"], 9)
-                ema21 = EMA(ticker, data["ohlcv"], 21)
-                rsi = RSI(ticker, data["ohlcv"], 4)
-                macd = MACD(ticker, data["ohlcv"], fast=12, slow=26, signal=9)
+                ema9 = EMA(ticker, data, 9)
+                ema21 = EMA(ticker, data, 21)
+                rsi = RSI(ticker, data, 4)
+                macd = MACD(ticker, data, fast=12, slow=26, signal=9)
                 
-                if ema9[-1] > ema21[-1] and rsi[-1] > 65 and macd["MACD"][-1] > macd["signal"][-1]:
+                if ema9[-1] > ema21[-1] and rsi[-1] > 65 and macd["macd"][-1] > macd["signal"][-1]:
                     # Allocate fraction based on the number of tickers for simplicity, could be optimized
                     self.allocation[ticker] = self.budget / len(self.tickers)
-                elif ema9[-1] < ema21[-1] and rsi[-1] < 45 and macd["MACD"][-1] < macd["signal"][-1]:
+                elif ema9[-1] < ema21[-1] and rsi[-1] < 45 and macd["macd"][-1] < macd["signal"][-1]:
                     self.allocation[ticker] = 0  # Liquidate the position
                 else:
                     # Existing allocation preserved if conditions for change are not met
