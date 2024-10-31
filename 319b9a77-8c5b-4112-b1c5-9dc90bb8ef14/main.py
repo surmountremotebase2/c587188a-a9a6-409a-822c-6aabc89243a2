@@ -23,9 +23,9 @@ class TradingStrategy(Strategy):
         target_allocation = {self.ticker: 0}  
         
         # Ensure we have enough data points for MACD and Signal line
-        if macd_data is not None and len(macd_data["MACD"]) > 0 and len(macd_data["signal"]) > 0:
+        if macd_data is not None and len(macd_data["macd"]) > 0 and len(macd_data["signal"]) > 0:
             # Compare the latest MACD line and signal line values
-            macd_line = macd_data["MACD"][-1]
+            macd_line = macd_data["macd"][-1]
             signal_line = macd_data["signal"][-1]
             
             # Log for debugging purposes
