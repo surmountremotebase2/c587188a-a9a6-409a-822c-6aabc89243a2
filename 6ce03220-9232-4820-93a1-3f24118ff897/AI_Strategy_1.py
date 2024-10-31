@@ -22,7 +22,7 @@ class TradingStrategy(Strategy):
         # Ensure there's enough data for EMA calculation
         if len(asset_data) >= 21:  # At least 21 days for EMA21
             # Calculate EMA7 and EMA21 for AAPL
-            ema7 = EMA(self.asset, asset_data, 7)[-1]
+            ema7 = EMA(self.asset, asset_data, 5)[-1]
             ema21 = EMA(self.asset, asset_data, 21)[-1]
 
             if ema7 > ema21:
