@@ -24,7 +24,7 @@ class TradingStrategy(Strategy):
                 ema9 = EMA(ticker, data, length=9)
                 ema21 = EMA(ticker, data, length=21)
                 rsi = RSI(ticker, data, length=4)
-                macd = MACD(ticker, data, fast=12, slow=26)
+                macd = MACD(ticker, data, fast=12, slow=26, signal=9)
                 
                 if ema9[-1] > ema21[-1] and rsi[-1] > 65 and macd["MACD"][-1] > macd["signal"][-1]:
                     # Allocate fraction based on the number of tickers for simplicity, could be optimized
