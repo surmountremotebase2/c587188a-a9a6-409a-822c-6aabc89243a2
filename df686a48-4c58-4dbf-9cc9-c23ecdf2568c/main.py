@@ -1,10 +1,10 @@
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import EMA, RSI, MACD
 
-class TradingStrategy(Strategy):  # Changed the class name to TradingStrategy
+class TradingStrategy(Strategy):
     @property
     def interval(self):
-        return "1h"  # Set to 1-hour intervals
+        return "60m"  # Set to 1-hour intervals in a supported format
 
     @property
     def assets(self):
@@ -13,7 +13,8 @@ class TradingStrategy(Strategy):  # Changed the class name to TradingStrategy
     def run(self, data):
         allocations = {}
         num_assets = len(self.assets)  # Count the number of assets
-        equal_percentage = 1 / num_assets  # Calculate equal percentage for each asset
+        investment_per_stock = 1000  # Define an investment amount
+        capital = sum(allocations.get(ticker, 0) for ticker in self.assets)  # Current capital
 
         for ticker in self.assets:
             ohlcv = data.get("ohlcv")[ticker]
