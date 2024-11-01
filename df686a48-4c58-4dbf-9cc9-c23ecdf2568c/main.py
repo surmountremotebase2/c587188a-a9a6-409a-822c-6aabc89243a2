@@ -1,38 +1,44 @@
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import EMA, RSI, MACD
+from surmount.logging import log
 
 class TradingStrategy(Strategy):
+
+    def __init__(self):
+        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META"]
+
     @property
     def interval(self):
-        return "1hour"  # Set to 1-hour intervals in a supported format
+        return "1hour"
 
     @property
     def assets(self):
-        return ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META", "AVGO"]
+        return self.tickers
 
     def run(self, data):
-        allocations = {}
-        num_assets = len(self.assets)  # Count the number of assets
-        investment_per_stock = 1000  # Define an investment amount
-        capital = sum(allocations.get(ticker, 0) for ticker in self.assets)  # Current capital
+        allocation_dict = {ticker: 0 for ticker in self.tickers}
+        total_investment = 1000
 
-        for ticker in self.assets:
-            ohlcv = data.get("ohlcv")[ticker]
+        for ticker in self.tickers:
+            ticker_data = data[ticker]['ohlcv']
 
-            # Calculate EMA9, EMA21, RSI(4), and MACD
-            ema9 = EMA(ticker, ohlcv, 9)
-            ema21 = EMA(ticker, ohlcv, 21)
-            rsi = RSI(ticker, ohlcv, 4)
-            macd_data = MACD(ticker, ohlcv, fast=12, slow=26)
-            macd_line = macd_data["macd"]
-            signal_line = macd_data["signal"]
+            if len(ticker_data) < 26:  # Ensure enough data for EMA and MACD
+                continue
+            
+            # Calculate technical indicators
+            ema9 = EMA(ticker, ticker_data, period=9)
+            ema21 = EMA(ticker, ticker_data, period=21)
+            rsi = RSI(ticker, ticker_data, period=4)
+            macd_line, signal_line = MACD(ticker, ticker_data)
 
-            # Entry condition: Buy when EMA9 > EMA21, RSI > 65, MACD > Signal
+            # Check conditions for buying
             if ema9[-1] > ema21[-1] and rsi[-1] > 65 and macd_line[-1] > signal_line[-1]:
-                allocations[ticker] = investment_per_stock / capital  # Allocate equal percentage
+                log(f"Investing in {ticker}")
+                allocation_dict[ticker] = total_investment / len(self.tickers)  # Distribute investment
 
-            # Exit condition: Sell when EMA9 < EMA21, RSI < 45, MACD < Signal
+            # Check conditions for liquidating
             elif ema9[-1] < ema21[-1] and rsi[-1] < 45 and macd_line[-1] < signal_line[-1]:
-                allocations[ticker] = 0  # Liquidate the position
+                log(f"Liquidating position in {ticker}")
+                allocation_dict[ticker] = 0  # Liquidate position
 
-        return TargetAllocation(allocations)
+        return TargetAllocation(allocation_dict)
