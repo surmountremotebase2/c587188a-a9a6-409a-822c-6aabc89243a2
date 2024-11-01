@@ -1,5 +1,5 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import EMA, RSI
+from surmount.technical_indicators import EMA, RSI, MACD
 
 class TradingStrategy(Strategy):  # Changed the class name to TradingStrategy
     @property
