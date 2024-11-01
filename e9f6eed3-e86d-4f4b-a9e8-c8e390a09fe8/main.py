@@ -26,11 +26,17 @@ class TradingStrategy(Strategy):
     def run(self, data):
         # Retrieve MACD and signal line values
         macd_data = MACD("AAPL", data["ohlcv"], 12, 26, 9)
+        # Print macd_data for debugging
+        print(f'MACD Data: {macd_data}')
+
         if macd_data is None:
             return TargetAllocation({})
         
         macd_line = macd_data["MACD"]
         signal_line = macd_data["signal"]
+         # Print macd_line and signal_line for debugging
+        print(f'MACD Line: {macd_line}')
+        print(f'Signal Line: {signal_line}')
         
         if len(macd_line) < 2 or len(signal_line) < 2:
             return TargetAllocation({})
