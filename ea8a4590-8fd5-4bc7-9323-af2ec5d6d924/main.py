@@ -21,14 +21,6 @@ class TradingStrategy(Strategy):
             # Calculate EMA9 and EMA21
             ema9 = EMA(ticker, data, 9)
             ema21 = EMA(ticker, data, 21)
-
-            macd_data = MACD(ticker, data, fast=12, slow=26)
-            macd_line = macd_data["MACD"][-1]
-            signal_line = macd_data["signal"][-1]
-            # Log the MACD data structure
-            log(f"MACD data for {ticker}: {macd_data}")
-            log(f"MACD line for {ticker}: {macd_line}")
-            log(f"Signal line for {ticker}: {signal_line}")
             
             # Ensure we have sufficient data to make a comparison
             if ema9 is not None and ema21 is not None and len(ema9) > 0 and len(ema21) > 0:
