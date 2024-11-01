@@ -21,9 +21,6 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             ticker_data = data[ticker]['ohlcv']
-
-            if len(ticker_data) < 26:  # Ensure enough data for EMA and MACD
-                continue
             
             # Calculate technical indicators
             ema9 = EMA(ticker, ticker_data, period=9)
