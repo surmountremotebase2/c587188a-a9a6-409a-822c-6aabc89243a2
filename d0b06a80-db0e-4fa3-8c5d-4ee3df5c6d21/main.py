@@ -38,16 +38,16 @@ class TradingStrategy(Strategy):
             current_rsi = RSI(ticker, data["ohlcv"], length=4)
 
             # Check if EMA and RSI data are available
-            if (current_rsi is not None and len(current_rsi) > 0) and (ema9 is not None and ema21 is not None and len(ema9) > 0 and len(ema21) > 0) :
+            if (current_rsi is not None and len(current_rsi) > 0) and (ema9 is not None and ema21 is not None and len(ema9) > 0 and len(ema21) > 0):
                 # Get the most recent RSI value
                 latest_rsi = current_rsi[-1]
-                if ema9[-1] > ema21[-1] and latest_rsi > 65
+                if ema9[-1] > ema21[-1] and latest_rsi > 65:
                     # EMA9 > EMA21, RSI>65, fully invest (1)
                     allocation_dict[ticker] = 1
-                elif ema9[-1] < ema21[-1] and latest_rsi< 45
+                elif ema9[-1] < ema21[-1] and latest_rsi< 45:
                     # EMA9 < EMA21, RSI < 45, liquidate (0)
                     allocation_dict[ticker] = 0
-                else 
+                else: 
                     # If EMAs are equal, or for any reason not able to decide, hold current position
                     # Not trading signals to hold, assuming it to remain as it is
                     # Maintain the current position if RSI is between 35 and 65
