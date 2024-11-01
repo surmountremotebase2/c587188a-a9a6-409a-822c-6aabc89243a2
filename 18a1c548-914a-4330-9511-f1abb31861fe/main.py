@@ -31,11 +31,11 @@ class MomentumEMAStrategy(Strategy):
             rsi = RSI(ticker, ohlcv, 14)
 
             # Entry Condition: Buy when EMA9 > EMA21, RSI > 65, and EMA12 - EMA26 > 9-day EMA of EMA diff
-            if ema9[-1] > ema21[-1] and rsi[-1] > 65 and ema_diff > ema_diff_9[-1]:
+            if ema9[-1] > ema21[-1] and rsi[-1] > 65:
                 allocations[ticker] = equal_percentage  # Allocate an equal percentage to this stock
 
             # Exit Condition: Sell when EMA9 < EMA21, RSI < 45, and EMA12 - EMA26 < 9-day EMA of EMA diff
-            elif ema9[-1] < ema21[-1] and rsi[-1] < 45 and ema_diff < ema_diff_9[-1]:
+            elif ema9[-1] < ema21[-1] and rsi[-1] < 45:
                 allocations[ticker] = 0  # Liquidate the position
 
         return TargetAllocation(allocations)
