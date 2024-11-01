@@ -4,7 +4,7 @@ from surmount.technical_indicators import EMA, RSI, MACD
 class TradingStrategy(Strategy):
     @property
     def interval(self):
-        return "60m"  # Set to 1-hour intervals in a supported format
+        return "1hour"  # Set to 1-hour intervals in a supported format
 
     @property
     def assets(self):
