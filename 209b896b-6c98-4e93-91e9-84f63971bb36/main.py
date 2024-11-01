@@ -23,13 +23,17 @@ class TradingStrategy(Strategy):
 
         # Calculate MACD for AAPL
         macd_data = MACD(self.ticker, data["ohlcv"], fast=12, slow=26)
-        if macd_data is None or len(macd_data["MACD"]) < 2:
+
+        # Check if macd_data is valid and contains necessary keys
+        macd_line = macd_data.get("MACD")
+        signal_line = macd_data.get("signal")
+
+        if macd_line is None or signal_line is None or len(macd_line) < 2:
             # Not enough data to calculate MACD
+            log("Not enough data to calculate MACD.")
             return TargetAllocation(allocation_dict)
 
         # Compare the last two MACD values to detect crossover
-        macd_line = macd_data["MACD"]
-        signal_line = macd_data["signal"]
         if macd_line[-1] > signal_line[-1] and macd_line[-2] < signal_line[-2]:
             # MACD crosses above signal line - bullish signal
             allocation_dict[self.ticker] = 1.0  # Full investment
