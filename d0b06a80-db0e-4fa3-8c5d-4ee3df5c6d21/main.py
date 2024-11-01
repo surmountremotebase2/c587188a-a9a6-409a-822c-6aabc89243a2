@@ -7,8 +7,6 @@ class TradingStrategy(Strategy):
     def __init__(self):
         # Define the tickers we will be trading
         self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META"]
-        # Initial allocation of $3000 across the assets
-        self.initial_investment = 3000
 
     @property
     def assets(self):
@@ -39,30 +37,28 @@ class TradingStrategy(Strategy):
             # Calculate the RSI for the current ticker
             current_rsi = RSI(ticker, data["ohlcv"], length=4)
 
-            # Check if EMA data is available
-            if ema9 is not None and ema21 is not None and len(ema9) > 0 and len(ema21) > 0:
-                # Compare the last available EMA values
-                if ema9[-1] > ema21[-1]:
-                    allocation_dict[ticker] = self.initial_investment / len(self.tickers)  # Invest fully
-                elif ema9[-1] < ema21[-1]:
-                    allocation_dict[ticker] = 0  # Liquidate position
-                else:
-                    log(f"No clear EMA crossover signal for {ticker}")
-
-            # Check if RSI data is available
-            if current_rsi is not None and len(current_rsi) > 0:
+            # Check if EMA and RSI data are available
+            if (current_rsi is not None and len(current_rsi) > 0) and (ema9 is not None and ema21 is not None and len(ema9) > 0 and len(ema21) > 0) :
+                # Get the most recent RSI value
                 latest_rsi = current_rsi[-1]
-
-                # Adjust allocation based on RSI conditions
-                if latest_rsi < 35:
-                    allocation_dict[ticker] = self.initial_investment / len(self.tickers)
-                elif latest_rsi > 65:
+                if ema9[-1] > ema21[-1] and latest_rsi > 65
+                    # EMA9 > EMA21, RSI>65, fully invest (1)
+                    allocation_dict[ticker] = 1
+                elif ema9[-1] < ema21[-1] and latest_rsi< 45
+                    # EMA9 < EMA21, RSI < 45, liquidate (0)
                     allocation_dict[ticker] = 0
-                else:
-                    # Maintain current position based on RSI
-                    allocation_dict[ticker] = allocation_dict.get(ticker, 0)  # Keep existing allocation or 0 if not set
+                else 
+                    # If EMAs are equal, or for any reason not able to decide, hold current position
+                    # Not trading signals to hold, assuming it to remain as it is
+                    # Maintain the current position if RSI is between 35 and 65
+                    # This could be treated as 'no action', or you might want to adjust it based on the strategy's need
+                    # Example placeholder for maintaining existing allocation - adjust as necessary
+                    # allocation_dict[ticker] = existing_allocation
+                    pass
             else:
-                allocation_dict[ticker] = 0  # Default to not investing if no RSI data
-
+                # If RSI data is not available, allocate 0 for the ticker
+                # If data is not available to compute EMAs, avoid trading
+                log(f"Insufficient EMA & RSI data available for {ticker}, no action taken.")
+                allocation_dict[ticker] = 0
         # Return the target allocations as a TargetAllocation object
         return TargetAllocation(allocation_dict)
