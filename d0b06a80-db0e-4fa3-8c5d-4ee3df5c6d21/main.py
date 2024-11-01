@@ -6,7 +6,7 @@ from surmount.logging import log
 class TradingStrategy(Strategy):
     def __init__(self):
         # Define the tickers we will be trading
-        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "PYPL", "SHOP", "SQ", "NFLX", "BRK.B", "LMT", "KO", "CRM", "UNH", "UPS", "WMT"]
+        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "PYPL", "NFLX", "BRK.B", "LMT", "KO", "CRM", "UNH", "UPS", "WMT", "PEP"]
         # Initial allocation of $3000 across the assets, can be adjusted based on strategy requirements
         self.initial_investment = 3000
 
