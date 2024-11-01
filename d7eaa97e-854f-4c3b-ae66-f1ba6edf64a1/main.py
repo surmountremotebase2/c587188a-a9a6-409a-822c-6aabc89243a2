@@ -20,7 +20,7 @@ class TradingStrategy(Strategy):
         # Use 1-hour interval for MACD calculation
         return "1hour"
 
-def run(self, data):
+    def run(self, data):
     # Iterate through each ticker to calculate the MACD and decide on the allocation
     for ticker in self.tickers:
         # Check if there's enough data for MACD calculation
