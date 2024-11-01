@@ -32,8 +32,8 @@ class TradingStrategy(Strategy):
         if macd_data is None:
             return TargetAllocation({})
         
-        macd_line = macd_data["macd"]
-        signal_line = macd_data["signal"]
+        macd_line = macd_data["macd_line"]
+        signal_line = macd_data["signal_line"]
          # Print macd_line and signal_line for debugging
         print(f'MACD Line: {macd_line}')
         print(f'Signal Line: {signal_line}')
