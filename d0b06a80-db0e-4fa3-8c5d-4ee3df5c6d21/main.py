@@ -36,17 +36,17 @@ class TradingStrategy(Strategy):
             ema21 = EMA(ticker, data, 21)
 
             # Calculate the RSI for the current ticker
-            current_rsi = RSI(ticker, data["ohlcv"], length=3)
+            current_rsi = RSI(ticker, data["ohlcv"], length=5)
 
             # Check if EMA and RSI data are available
             if (current_rsi is not None and len(current_rsi) > 0) and (ema9 is not None and ema21 is not None and len(ema9) > 0 and len(ema21) > 0):
                 # Get the most recent RSI value
                 latest_rsi = current_rsi[-1]
-                if ema9[-1] > ema21[-1] and latest_rsi > 70:
+                if ema9[-1] > ema21[-1] and latest_rsi > 65:
                     # EMA9 > EMA21, RSI>65, fully invest (1)
                     allocation_dict[ticker] = self.initial_investment / len(self.tickers)
                     #log(f"Investing in {ticker}: ${allocation_dict[ticker]:.2f}")
-                elif ema9[-1] < ema21[-1] and latest_rsi < 30:
+                elif ema9[-1] < ema21[-1] and latest_rsi < 35:
                     # EMA9 < EMA21, RSI < 45, liquidate (0)
                     allocation_dict[ticker] = 0
                     #log(f"Liquidating position for {ticker}")
