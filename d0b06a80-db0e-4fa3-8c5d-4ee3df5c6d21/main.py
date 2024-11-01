@@ -6,7 +6,9 @@ from surmount.logging import log
 class TradingStrategy(Strategy):
     def __init__(self):
         # Define the tickers we will be trading
-        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META"]
+        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META", "AMAZN", "GOOGL", "PYPL", "SHOP", "SQ", "NFLX"]
+        # Initial allocation of $3000 across the assets, can be adjusted based on strategy requirements
+        self.initial_investment = 3000
 
     @property
     def assets(self):
@@ -43,7 +45,7 @@ class TradingStrategy(Strategy):
                 latest_rsi = current_rsi[-1]
                 if ema9[-1] > ema21[-1] and latest_rsi > 65:
                     # EMA9 > EMA21, RSI>65, fully invest (1)
-                    allocation_dict[ticker] = 1
+                    allocation_dict[ticker] = self.initial_investment / len(self.tickers)
                 elif ema9[-1] < ema21[-1] and latest_rsi< 45:
                     # EMA9 < EMA21, RSI < 45, liquidate (0)
                     allocation_dict[ticker] = 0
