@@ -37,12 +37,12 @@ class TradingStrategy(Strategy):
             macd_signal = macd["signal"][-1] if "signal" in macd else None
 
             # Buy Logic: EMA9 above EMA21, RSI above 65, and MACD above signal line
-            if current_ema9 > current_ema21 and current_rsi > 65 and current_macd is not None and macd_signal is not None and current_macd > macd_signal:
+            if current_ema9 > current_ema21 and current_rsi > 65 and current_macd > macd_signal:
                 log("Buying signal")
                 allocation_dict["AAPL"] = 1  # Full allocation to AAPL
                 
             # Sell Logic: EMA9 below EMA21, RSI below 45, and MACD below signal line
-            elif current_ema9 < current_ema21 and current_rsi < 45 and current_macd is not None and macd_signal is not None and current_macd < macd_signal:
+            elif current_ema9 < current_ema21 and current_rsi < 45 and current_macd < macd_signal:
                 log("Selling signal - Liquidate position")
                 allocation_dict["AAPL"] = 0  # No allocation to AAPL
 
