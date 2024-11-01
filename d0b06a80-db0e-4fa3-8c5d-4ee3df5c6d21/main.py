@@ -36,7 +36,7 @@ class TradingStrategy(Strategy):
             ema21 = EMA(ticker, data, 21)
 
             # Calculate the RSI for the current ticker
-            current_rsi = RSI(ticker, data["ohlcv"], length=14)
+            current_rsi = RSI(ticker, data["ohlcv"], length=4)
 
             # Check if EMA and RSI data are available
             if (current_rsi is not None and len(current_rsi) > 0) and (ema9 is not None and ema21 is not None and len(ema9) > 0 and len(ema21) > 0):
