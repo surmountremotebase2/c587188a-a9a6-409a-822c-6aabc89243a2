@@ -5,7 +5,8 @@ from surmount.logging import log
 class TradingStrategy(Strategy):
     def __init__(self):
         # Define the tickers we will be trading
-        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "PYPL", "NFLX", "LMT", "KO", "CRM", "UNH", "UPS", "WMT", "PEP"]
+        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL"] 
+        #, "PYPL", "NFLX", "LMT", "KO", "CRM", "UPS", "WMT", "PEP"]
         # Initial allocation of $3000 across the assets, can be adjusted based on strategy requirements
         self.initial_investment = 3000
 
@@ -45,11 +46,11 @@ class TradingStrategy(Strategy):
                 if ema9[-1] > ema21[-1] and latest_rsi > 65:
                     # EMA9 > EMA21, RSI>65, fully invest (1)
                     allocation_dict[ticker] = self.initial_investment / len(self.tickers)
-                    log(f"Investing in {ticker}: ${allocation_dict[ticker]:.2f}")
+                    #log(f"Investing in {ticker}: ${allocation_dict[ticker]:.2f}")
                 elif ema9[-1] < ema21[-1] and latest_rsi< 45:
                     # EMA9 < EMA21, RSI < 45, liquidate (0)
                     allocation_dict[ticker] = 0
-                    log(f"Liquidating position for {ticker}")
+                    #log(f"Liquidating position for {ticker}")
                 else: 
                     # If EMAs are equal, or for any reason not able to decide, hold current position
                     # Not trading signals to hold, assuming it to remain as it is
