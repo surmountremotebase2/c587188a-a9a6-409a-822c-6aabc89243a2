@@ -1,7 +1,7 @@
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import EMA, RSI
 
-class MomentumEMAStrategy(Strategy):
+class TradingStrategy(Strategy):  # Changed the class name to TradingStrategy
     @property
     def interval(self):
         return "1h"  # Set to 1-hour intervals
