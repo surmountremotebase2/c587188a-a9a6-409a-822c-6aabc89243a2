@@ -25,7 +25,7 @@ class TradingStrategy(Strategy):
     
     def run(self, data):
         # Retrieve MACD and signal line values
-        macd_data = MACD("AAPL", data["ohlcv"], 12, 26)
+        macd_data = MACD("AAPL", data, 12, 26)
         # Print macd_data for debugging
         print(f'MACD Data: {macd_data}')
 
