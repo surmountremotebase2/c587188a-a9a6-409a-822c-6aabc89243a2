@@ -6,7 +6,8 @@ class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = ["AAPL", "MSFT"]  # Consider uncommenting other tickers for more diversification
         self.total_investment = 2000  # Total investment amount of $2,000
-        self.initial_allocation = self.total_investment / len(self.tickers)  # Equal allocation per ticker
+        self.initial_allocation = self.total_investment / len(self.tickers)  # Initial equal allocation per ticker
+        self.max_allocation = self.total_investment  # Maximum total investment
 
     @property
     def interval(self):
@@ -50,12 +51,16 @@ class TradingStrategy(Strategy):
             current_macd = macd_line[-1]
             current_signal = signal_line[-1]
 
-            # Entry Conditions to Buy
+            # Entry Conditions to Buy (incremental)
             if (current_close <= current_bb_lower or
                 current_macd > current_signal or
                 current_ema9 > current_ema21 or
                 current_rsi > 65):
-                allocation_dict[ticker] += self.initial_allocation  # Buy with equal allocation
+                # Incrementally increase allocation
+                current_allocation = allocation_dict[ticker]
+                additional_allocation = self.initial_allocation * 0.5  # Incremental buy (50% of initial allocation)
+                new_allocation = min(current_allocation + additional_allocation, self.max_allocation / len(self.tickers))
+                allocation_dict[ticker] = new_allocation
 
             # Liquidation Conditions to Sell
             elif current_signal > current_macd:
