@@ -1,70 +1,44 @@
-from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import RSI, EMA, BB
-from .macd import MACD  # Import the MACD function from the macd module
-
-class TradingStrategy(Strategy):
+class TradingStrategy:
     def __init__(self):
-        self.tickers = ["AAPL", "MSFT"]  # Consider uncommenting other tickers for more diversification
-        self.total_investment = 2000  # Total investment amount of $2,000
-        self.initial_allocation = self.total_investment / len(self.tickers)  # Initial equal allocation per ticker
-        self.max_allocation = self.total_investment  # Maximum total investment
+        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.total_investment = 2000
+        self.investment_per_stock = self.total_investment / len(self.tickers)
+        self.positions = {ticker: 0 for ticker in self.tickers}
 
-    @property
-    def interval(self):
-        return "1hour"
-
-    @property
-    def assets(self):
-        return self.tickers
-
-    def run(self, data):
-        allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocations to zero
-        ohlcv = data.get("ohlcv")
-
+    def evaluate_conditions(self, data):
         for ticker in self.tickers:
-            close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            if len(close_prices) < 20:  # Ensure there is enough data for the indicators
-                continue
-
-            # Calculate indicators
-            rsi_data = RSI(ticker, ohlcv, 14)  # Use 14-period RSI
-            ema9 = EMA(ticker, ohlcv, 9)
-            ema21 = EMA(ticker, ohlcv, 21)
-            bb_data = BB(ticker, ohlcv, 20)
-
-            if not rsi_data or not ema9 or not ema21 or not bb_data['upper']:
-                continue  # Skip if any indicator returns insufficient data
-
-            # Get the latest values
-            current_rsi = rsi_data[-1]
-            current_ema9 = ema9[-1]
-            current_ema21 = ema21[-1]
-            current_close = close_prices[-1]
-            current_bb_upper = bb_data['upper'][-1]
-            current_bb_lower = bb_data['lower'][-1]
-
-            # Calculate MACD
+            # Extract data for indicators
+            close_prices = data[ticker]['close']
+            ema9 = technical_indicators.EMA(ticker, data, 9)
+            ema21 = technical_indicators.EMA(ticker, data, 21)
             macd_line, signal_line = MACD(close_prices)
-            if not macd_line or not signal_line:
-                continue  # Skip if MACD calculation fails
+            rsi = technical_indicators.RSI(ticker, data, 14)
+            bollinger_bands = technical_indicators.BB(ticker, data, 20, 2)
+            lower_band = bollinger_bands['lower']
+            upper_band = bollinger_bands['upper']
+            
+            # Check Buy Conditions
+            buy_condition_1 = (macd_line[-1] > signal_line[-1] and ema9[-1] > ema21[-1] and rsi[-1] < 49)
+            buy_condition_2 = (close_prices[-1] <= lower_band[-1])
+            buy_condition_3 = (rsi[-1] < 30)
 
-            current_macd = macd_line[-1]
-            current_signal = signal_line[-1]
+            if buy_condition_1 or buy_condition_2 or buy_condition_3:
+                self.buy_stock(ticker)
 
-            # Entry Conditions to Buy (incremental)
-            if (current_close <= current_bb_lower or
-                current_macd > current_signal or
-                current_ema9 > current_ema21 or
-                current_rsi > 65):
-                # Incrementally increase allocation
-                current_allocation = allocation_dict[ticker]
-                additional_allocation = self.initial_allocation * 0.5  # Incremental buy (50% of initial allocation)
-                new_allocation = min(current_allocation + additional_allocation, self.max_allocation / len(self.tickers))
-                allocation_dict[ticker] = new_allocation
+            # Check Sell Conditions
+            sell_condition_1 = (signal_line[-1] > macd_line[-1] and ema21[-1] > ema9[-1] and rsi[-1] > 52)
+            sell_condition_2 = (close_prices[-1] >= upper_band[-1])
+            sell_condition_3 = (rsi[-1] >= 70)
 
-            # Liquidation Conditions to Sell
-            elif current_signal > current_macd:
-                allocation_dict[ticker] = 0  # Liquidate the stock
+            if sell_condition_1 or sell_condition_2 or sell_condition_3:
+                self.sell_stock(ticker)
 
-        # Return the target allocation
-        return TargetAllocation(allocation_dict)
+    def buy_stock(self, ticker):
+        if self.positions[ticker] == 0:  # Only buy if not already holding the stock
+            self.positions[ticker] = self.investment_per_stock
+            print(f"Bought {ticker} with ${self.investment_per_stock}")
+
+    def sell_stock(self, ticker):
+        if self.positions[ticker] > 0:  # Only sell if holding the stock
+            print(f"Sold {ticker} with ${self.positions[ticker]}")
+            self.positions[ticker] = 0
