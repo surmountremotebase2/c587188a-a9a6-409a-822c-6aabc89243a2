@@ -1,8 +1,7 @@
 import pandas as pd
 from .macd import MACD  # Import the MACD function from macd.py
-from surmount import technical_indicators  # Ensure to import the correct indicators
+from surmount import technical_indicators  # Import technical indicators
 from surmount.base_class import Strategy  # Import the Strategy base class
-
 
 class TradingStrategy(Strategy):
     def __init__(self):
@@ -19,8 +18,8 @@ class TradingStrategy(Strategy):
 
     @property
     def interval(self):
-        """Return the trading interval (e.g., '1h', '1d')."""
-        return '1hour'  # Change to your desired interval
+        """Return the trading interval (e.g., '1hour')."""
+        return '1hour'  # Updated to '1hour'
 
     def get_ohlcv_data(self, ticker):
         # Placeholder for data retrieval function, replace with actual method
@@ -30,12 +29,12 @@ class TradingStrategy(Strategy):
         close_prices = [item['close'] for item in data]
         
         # Calculate technical indicators
-        macd_line, signal_line = MACD(close_prices)
+        macd_line, signal_line = MACD(close_prices)  # Use the MACD function from macd.py
         ema9 = technical_indicators.EMA(ticker, data, length=9)
         ema21 = technical_indicators.EMA(ticker, data, length=21)
         rsi = technical_indicators.RSI(ticker, data, length=14)  # RSI set to 14
         bollinger_bands = technical_indicators.BB(ticker, data, length=20, std=2)
-        
+
         # Extract current values
         current_macd = macd_line[-1]
         current_signal = signal_line[-1]
@@ -49,16 +48,16 @@ class TradingStrategy(Strategy):
         # Entry conditions
         if (
             (current_macd > current_signal and current_ema9 > current_ema21 and current_rsi < 40) or
-            (current_price <= lower_band) or
-            (current_rsi < 30)
+            (current_price <= lower_band) or  # Price touches or goes below the lower Bollinger Band
+            (current_rsi < 30)  # RSI condition for buy
         ):
             return 'buy'
 
         # Exit conditions
         if (
             (current_signal > current_macd and current_ema21 > current_ema9 and current_rsi > 60) or
-            (current_price >= upper_band) or
-            (current_rsi >= 70)
+            (current_price >= upper_band) or  # Price touches or goes above the upper Bollinger Band
+            (current_rsi >= 70)  # RSI condition for sell
         ):
             return 'sell'
 
