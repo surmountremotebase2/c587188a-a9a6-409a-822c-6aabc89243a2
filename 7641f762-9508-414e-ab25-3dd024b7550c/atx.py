@@ -1,4 +1,5 @@
 #calculate_adx
+import pandas as pd
 
 def calculate_adx(ohlcv, period=14):
     # Calculate the +DI and -DI
