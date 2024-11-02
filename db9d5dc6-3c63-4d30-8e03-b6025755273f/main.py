@@ -9,7 +9,7 @@ class TradingStrategy(Strategy):
             "AMZN", "GOOGL", "LMT", "NOC", "BAC", "GS", "PFE", "JNJ", "FDX", "UNP"
         ]  # Adjusted tickers as needed
         self.total_investment = 3000  # Total investment amount is $3,000
-        self.investment_rate = 0.3  # Rate at which to invest (30%)
+        self.investment_rate = 0.25  # Rate at which to invest (25%)
         self.initial_allocation = self.total_investment * self.investment_rate / len(self.tickers)  # Equal allocation per ticker
 
     @property
@@ -54,9 +54,9 @@ class TradingStrategy(Strategy):
             # Investment Conditions
             if (current_close <= current_bb_lower or
                 current_ema9 > current_ema21 or
-                (current_ema9 > current_ema21 and current_rsi > 52) or
+                (current_ema9 > current_ema21 and current_rsi > 40) or
                 (current_rsi < 30) or
-                (current_macd > current_signal and current_rsi > 52)):
+                (current_macd > current_signal and current_rsi > 40)):
                 allocation_dict[ticker] += self.initial_allocation  # Invest 30% of initial investment
                 holding_dict[ticker] += self.initial_allocation / current_close  # Update holding amount
 
@@ -64,8 +64,8 @@ class TradingStrategy(Strategy):
             current_value = holding_dict[ticker] * current_close
             liquidate_value = allocation_dict[ticker] * 1.1  # The value to compare against
 
-            if (current_signal > current_macd and current_rsi < 48) or \
-               (current_ema21 > current_ema9 and current_rsi < 48) or \
+            if (current_signal > current_macd and current_rsi > 55) or \
+               (current_ema21 > current_ema9 and current_rsi > 55) or \
                (current_close >= current_bb_upper):
                 if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
                     allocation_dict[ticker] = 0  # Liquidate the stock
