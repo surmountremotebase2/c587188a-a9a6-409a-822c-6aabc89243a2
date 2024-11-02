@@ -60,7 +60,7 @@ class TradingStrategy(Strategy):
                         obv > obv[-2]
                     ]
 
-                    if sum(buy_conditions) >= 5:
+                    if sum(buy_conditions) >= 4:
                         allocation_dict[ticker] = self.initial_investment / len(self.tickers)
 
                     sell_conditions = [
@@ -73,7 +73,7 @@ class TradingStrategy(Strategy):
                         atr > 0
                     ]
 
-                    if sum(sell_conditions) >= 7:
+                    if sum(sell_conditions) >= 6:
                         allocation_dict[ticker] = 0
 
             except Exception as e:
