@@ -1,6 +1,6 @@
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.logging import log
-from macd import MACD  # Import the MACD function from the macd module
+from .macd import MACD  # Import the MACD function from the macd module
 
 class TradingStrategy(Strategy):
 
