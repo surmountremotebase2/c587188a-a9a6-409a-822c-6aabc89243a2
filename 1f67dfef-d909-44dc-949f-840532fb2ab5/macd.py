@@ -1,61 +1,32 @@
 import pandas as pd
-import logging
-from surmount.base_class import Strategy, TargetAllocation
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+def MACD(close_prices, fast_period=12, slow_period=26, signal_period=9):
+    """
+    Calculate the MACD line and signal line.
 
-class TradingStrategy(Strategy):
-    def __init__(self):
-        self.tickers = ["AAPL", "TSLA"]
-        self.investment = 3000  # Total amount to invest
+    Parameters:
+    close_prices (List[float]): List of closing prices.
+    fast_period (int): The period for the fast EMA.
+    slow_period (int): The period for the slow EMA.
+    signal_period (int): The period for the signal line (EMA of the MACD line).
 
-    @property
-    def interval(self):
-        return "1day"  # Define the interval for the strategy
+    Returns:
+    Tuple[List[float], List[float]]: A tuple containing the MACD line and the signal line.
+    """
+    prices_df = pd.DataFrame(close_prices, columns=['close'])
 
-    @property
-    def assets(self):
-        return self.tickers  # Define the assets you are trading
+    # Calculate the fast and slow EMAs
+    prices_df['EMA_fast'] = prices_df['close'].ewm(span=fast_period, adjust=False).mean()
+    prices_df['EMA_slow'] = prices_df['close'].ewm(span=slow_period, adjust=False).mean()
 
-    def calculate_macd(self, data, short_window=12, long_window=26, signal_window=9):
-        """Calculate the MACD and Signal line."""
-        short_ema = data['close'].ewm(span=short_window, adjust=False).mean()
-        long_ema = data['close'].ewm(span=long_window, adjust=False).mean()
-        macd_line = short_ema - long_ema
-        signal_line = macd_line.ewm(span=signal_window, adjust=False).mean()
+    # Calculate the MACD line
+    prices_df['MACD'] = prices_df['EMA_fast'] - prices_df['EMA_slow']
 
-        # Log the last few MACD values for debugging
-        logger.info(f"MACD Line: {macd_line.tail()}")
-        logger.info(f"Signal Line: {signal_line.tail()}")
+    # Calculate the signal line (EMA of MACD line)
+    prices_df['Signal_Line'] = prices_df['MACD'].ewm(span=signal_period, adjust=False).mean()
 
-        return macd_line.tolist(), signal_line.tolist()
+    # Extract MACD and Signal Line as lists
+    macd_line = prices_df['MACD'].tolist()
+    signal_line = prices_df['Signal_Line'].tolist()
 
-    def run(self, data):
-        allocation_dict = {ticker: 0 for ticker in self.tickers}  # Start with no allocation
-        ohlcv = data.get("ohlcv")
-
-        for ticker in self.tickers:
-            # Ensure OHLCV data is available for the ticker
-            if ticker not in ohlcv:
-                continue
-            
-            # Call the calculate_macd function with the appropriate data
-            macd_line, signal_line = self.calculate_macd(ohlcv[ticker])  
-
-            # Ensure enough data is available
-            if len(macd_line) < 2 or len(signal_line) < 2:
-                continue  # Not enough data to make a decision
-
-            # Buy condition: MACD crosses above the Signal line
-            if macd_line[-2] < signal_line[-2] and macd_line[-1] > signal_line[-1]:
-                allocation_dict[ticker] = self.investment / len(self.tickers)  # Allocate investment
-                logger.info(f"Buying {ticker}: {allocation_dict[ticker]}")
-
-            # Sell condition: Signal line crosses above the MACD
-            elif macd_line[-2] > signal_line[-2] and macd_line[-1] < signal_line[-1]:
-                allocation_dict[ticker] = 0  # Liquidate the position
-                logger.info(f"Selling {ticker}: Liquidated position")
-
-        return TargetAllocation(allocation_dict)  # Return the allocation
+    return macd_line, signal_line
