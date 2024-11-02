@@ -1,5 +1,5 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import EMA, RSI, BB, SO, PSAR, OBV
+from surmount.technical_indicators import EMA, RSI, BB, StochasticOscillator as SO, PSAR, OBV
 from surmount.logging import log
 
 class TradingStrategy(Strategy):
