@@ -1,6 +1,6 @@
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.logging import log
-from surmount.technical_indicators import EMA  # Import the EMA function
+from surmount.technical_indicators import EMA, MACD  # Import MACD along with EMA
 
 class TradingStrategy(Strategy):
 
@@ -24,20 +24,24 @@ class TradingStrategy(Strategy):
         allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocation
         ohlcv = data.get("ohlcv")  # Get OHLCV data for analysis
 
-        # Check if we have enough data to calculate EMAs
+        # Check if we have enough data to calculate EMAs and MACD
         if len(ohlcv) < 21:
             return TargetAllocation(allocation_dict)  # Not enough data to make a decision
 
-        # Calculate EMA 9 and EMA 21 using the provided EMA function
+        # Calculate EMA 9 and EMA 21
         ema9 = EMA("TSLA", ohlcv, length=9)
         ema21 = EMA("TSLA", ohlcv, length=21)
 
-        # Check if EMAs have enough data points to evaluate
-        if len(ema9) < 2 or len(ema21) < 2:
-            return TargetAllocation(allocation_dict)  # Not enough data to calculate EMAs
+        # Calculate MACD values
+        macd_data = MACD("TSLA", ohlcv)  # Assuming MACD function returns the needed data structure
 
-        # Log the latest EMA values for debugging
+        # Check if EMAs and MACD have enough data points to evaluate
+        if len(ema9) < 2 or len(ema21) < 2 or len(macd_data) < 1:
+            return TargetAllocation(allocation_dict)  # Not enough data to calculate EMAs or MACD
+
+        # Log the latest EMA values and the entire MACD data structure
         log(f"Latest EMA9: {ema9[-1]}, Latest EMA21: {ema21[-1]}")
+        log(f"Latest MACD Data Structure: {macd_data}")  # Log the entire MACD data structure
 
         # Entry and exit logic
         if ema9[-1] > ema21[-1] and ema9[-2] <= ema21[-2]:
