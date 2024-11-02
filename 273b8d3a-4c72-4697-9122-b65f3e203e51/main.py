@@ -58,10 +58,17 @@ class TradingStrategy(Strategy):
                     if ohlcv[-1]['close'] < stop_loss_price:
                         self.allocation_dict[ticker] = 0  # Liquidate position at stop-loss
                         log(f"Stop-loss triggered for {ticker}. Liquidating position.")
-        
+
+                # Exit if ATR is greater than zero
+                if self.allocation_dict[ticker] > 0 and atr > 0:
+                    self.allocation_dict[ticker] = 0  # Liquidate position if ATR > 0
+                    log(f"ATR condition met for {ticker}. Liquidating position.")
+
             except KeyError as e:
                 log(f"KeyError for {ticker}: {e}")
             except Exception as e:
                 log(f"Error processing {ticker}: {str(e)}")
 
         return TargetAllocation(self.allocation_dict)
+
+# Note: Make sure to adjust the import paths based on your project structure.
