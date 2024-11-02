@@ -4,7 +4,7 @@ from .macd import MACD  # Import the MACD function from the macd module
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD"]#, "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
         self.total_investment = 3000  # Total investment amount
         self.initial_allocation = self.total_investment / len(self.tickers)  # Equal allocation per ticker
 
