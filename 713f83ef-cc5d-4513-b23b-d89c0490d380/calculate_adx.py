@@ -1,4 +1,4 @@
-# macd.py
+# calculate_atr.py
 import pandas as pd
 
 def calculate_atr(ohlcv, period=14):
