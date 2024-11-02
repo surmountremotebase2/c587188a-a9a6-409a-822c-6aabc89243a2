@@ -62,7 +62,7 @@ class TradingStrategy(Strategy):
 
             # Liquidation Conditions
             current_value = holding_dict[ticker] * current_close
-            liquidate_value = allocation_dict[ticker] * 1.05  # The value to compare against
+            liquidate_value = allocation_dict[ticker] * 1.15  # The value to compare against
 
             if (current_signal > current_macd and current_rsi < 48) or \
                (current_ema21 > current_ema9 and current_rsi < 48) or \
