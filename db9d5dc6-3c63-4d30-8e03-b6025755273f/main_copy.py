@@ -43,8 +43,8 @@ class TradingStrategy(Strategy):
 
             # Entry Conditions to Buy
             if (current_close <= current_bb_lower or
-                current_macd > current_signal and
-                current_ema9 > current_ema21 and
+                current_macd > current_signal or
+                current_ema9 > current_ema21 or
                 current_rsi > 65):  # All conditions met for buying
                 allocation_dict[ticker] += self.initial_allocation  # Buy with equal allocation
 
