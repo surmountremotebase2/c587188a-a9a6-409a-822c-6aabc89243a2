@@ -1,5 +1,4 @@
 # calculate_atr.py
-import pandas as pd
 
 def calculate_atr(ohlcv, period=14):
     # ohlcv is expected to be a DataFrame with columns: ['high', 'low', 'close']
