@@ -61,4 +61,4 @@ class TradingStrategy(Strategy):
             except Exception:
                 pass  # Ignore other errors
 
-        return TargetAll
+        return TargetAllocation(self.allocation_dict)
