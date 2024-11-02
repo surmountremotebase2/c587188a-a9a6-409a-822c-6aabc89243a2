@@ -5,8 +5,8 @@ from .macd import MACD  # Import the MACD function from the macd module
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
-        self.data_list = []
         self.total_investment = 3000  # Total investment amount
+        self.initial_allocation = self.total_investment / len(self.tickers)  # Equal allocation per ticker
 
     @property
     def interval(self):
@@ -16,12 +16,8 @@ class TradingStrategy(Strategy):
     def assets(self):
         return self.tickers
 
-    @property
-    def data(self):
-        return self.data_list
-
     def run(self, data):
-        allocation_dict = {ticker: self.total_investment / len(self.tickers) for ticker in self.tickers}
+        allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocations to zero
         ohlcv = data.get("ohlcv")
 
         for ticker in self.tickers:
@@ -46,21 +42,18 @@ class TradingStrategy(Strategy):
             current_signal = signal_line[-1]
 
             # Entry Conditions to Buy
-            if (current_ema9 > current_ema21 and
-                current_rsi > 65 and
+            if (current_close <= current_bb_lower and
                 current_macd > current_signal and
-                current_close >= current_bb_lower):  # Adjust this line to check upward movement
-                allocation_dict[ticker] += allocation_dict[ticker] * 0.1  # Increase allocation for entry
+                current_ema9 > current_ema21 and
+                current_rsi > 65):  # All conditions met for buying
+                allocation_dict[ticker] += self.initial_allocation  # Buy with equal allocation
 
-            # Liquidate Conditions
-            elif (current_ema9 < current_ema21 and
-                  current_rsi < 45 and
+            # Liquidation Conditions
+            elif (current_close >= current_bb_upper and
                   current_macd < current_signal and
-                  current_close <= current_bb_upper):  # Adjust this line to check downward movement
-                allocation_dict[ticker] -= allocation_dict[ticker] * 0.1  # Decrease allocation for liquidation
+                  current_ema9 < current_ema21 and
+                  current_rsi < 45):  # All conditions met for liquidation
+                allocation_dict[ticker] = 0  # Liquidate the stock
 
-        # Normalize allocations
-        total_allocation = sum(allocation_dict.values())
-        normalized_allocation = {ticker: allocation / total_allocation for ticker, allocation in allocation_dict.items()}
-
-        return TargetAllocation(normalized_allocation)
+        # Normalize allocations (though only equal or zero allocations will be present)
+        return TargetAllocation(allocation_dict)
