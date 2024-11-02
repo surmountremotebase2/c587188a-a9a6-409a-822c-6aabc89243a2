@@ -7,47 +7,14 @@ class TradingStrategy(Strategy):
         self.tickers = ["AAPL", "TSLA"]
         self.investment = 3000  # Total amount to invest
 
-    @property
-    def interval(self):
-        return "1hour"
-
-    @property
-    def assets(self):
-        return self.tickers
-
-    @property
-    def data(self):
-        return [Ratios(ticker) for ticker in self.tickers]
-
-    def calculate_macd(self, data, short_window=12, long_window=26, signal_window=9):
-        """Calculate MACD and Signal Line.
-
-        Args:
-            data (List[Dict[str, Dict[str, float]]]): OHLCV data.
-            short_window (int): Short period for EMA.
-            long_window (int): Long period for EMA.
-            signal_window (int): Signal period for EMA.
-
-        Returns:
-            Tuple[List[float], List[float]]: MACD line and Signal line.
-        """
-        close_prices = pd.Series([entry['close'] for entry in data])
-
-        # Calculate the short and long EMA
-        short_ema = close_prices.ewm(span=short_window, adjust=False).mean()
-        long_ema = close_prices.ewm(span=long_window, adjust=False).mean()
-
-        # Calculate MACD line
-        macd_line = short_ema - long_ema
-
-        # Calculate Signal line
-        signal_line = macd_line.ewm(span=signal_window, adjust=False).mean()
-
-        return macd_line.tolist(), signal_line.tolist()
+    # Other methods as before...
 
     def run(self, data):
         allocation_dict = {ticker: 0 for ticker in self.tickers}  # Start with no allocation
         ohlcv = data.get("ohlcv")
+
+        # Example print statement (make sure to remove or modify for production)
+        print(data["ohlcv"]["AAPL"])  # Ensure this line is not mixed with import statements
 
         for ticker in self.tickers:
             macd_line, signal_line = self.calculate_macd(ohlcv[ticker])  # Get MACD and Signal lines
@@ -62,3 +29,6 @@ class TradingStrategy(Strategy):
 
             # Sell condition: Signal line crosses above the MACD
             elif macd_line[-2] > signal_line[-2] and macd_line[-1] < signal_line[-1]:
+                allocation_dict[ticker] = 0  # Liquidate the position
+
+        return TargetAllocation(allocation_dict)  # Return the allocation
