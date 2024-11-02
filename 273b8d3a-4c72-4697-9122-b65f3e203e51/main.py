@@ -32,8 +32,8 @@ class TradingStrategy(Strategy):
         ema9 = EMA("TSLA", ohlcv, length=9)
         ema21 = EMA("TSLA", ohlcv, length=21)
 
-        # Calculate MACD values
-        macd_data = MACD("TSLA", ohlcv)  # Assuming MACD function returns the needed data structure
+        # Calculate MACD values with appropriate fast and slow periods
+        macd_data = MACD("TSLA", ohlcv, fast=12, slow=26)  # Provide fast and slow parameters
 
         # Check if EMAs and MACD have enough data points to evaluate
         if len(ema9) < 2 or len(ema21) < 2 or len(macd_data) < 1:
