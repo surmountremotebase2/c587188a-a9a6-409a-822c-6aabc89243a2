@@ -1,13 +1,12 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import EMA, ATR
+from surmount.technical_indicators import EMA
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        # Define tickers for the strategy
-        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META"]
-        # Allocation dict to track our position for each asset 
-        self.allocation_dict = {ticker: 0 for ticker in self.tickers}
-        self.entry_price = {ticker: 0 for ticker in self.tickers}  # Track entry prices for stop-loss
+        # Define ticker for the strategy
+        self.ticker = "TSLA"
+        # Allocation dict to track position for the asset 
+        self.allocation_dict = {self.ticker: 0}
 
     @property
     def interval(self):
@@ -17,45 +16,26 @@ class TradingStrategy(Strategy):
     @property
     def assets(self):
         # Return the list of tickers
-        return self.tickers
+        return [self.ticker]
 
     def run(self, data):
-        # Iterate through tickers to apply the strategy
-        for ticker in self.tickers:
-            try:
-                # Check if data["ohlcv"] is a list and handle accordingly
-                if isinstance(data["ohlcv"], list):
-                    # This assumes you have a single OHLCV list for all tickers
-                    ohlcv = data["ohlcv"]  
-                else:
-                    ohlcv = data["ohlcv"][ticker]  # This assumes a dictionary structure
+        # Access OHLCV data for TSLA
+        ohlcv_data = data["ohlcv"].get(self.ticker, [])
+        
+        # Ensure we have enough data points for EMA
+        if len(ohlcv_data) < 21:
+            return TargetAllocation(self.allocation_dict)  # Not enough data to compute EMA
 
-                # Proceed with calculating EMA and ATR
-                ema9 = EMA(ticker, ohlcv, length=9)[-1]  # Latest EMA9
-                ema21 = EMA(ticker, ohlcv, length=21)[-1]  # Latest EMA21
-                atr = ATR(ticker, ohlcv, length=14)[-1]  # Latest ATR
+        # Calculate EMA9 and EMA21
+        ema9 = EMA(self.ticker, ohlcv_data, period=9)
+        ema21 = EMA(self.ticker, ohlcv_data, period=21)
 
-                # Check for entry condition
-                if ema9 > ema21:
-                    if self.allocation_dict[ticker] == 0:  # Not already in position
-                        self.entry_price[ticker] = ohlcv[-1]['close']  # Record entry price
-                        self.allocation_dict[ticker] = 1.0 / len(self.tickers)  # Allocate equally among assets
-
-                # Check for exit condition
-                elif ema21 > ema9:
-                    if self.allocation_dict[ticker] > 0:  # Already in position
-                        self.allocation_dict[ticker] = 0  # Liquidate position
-
-                # Implementing stop-loss
-                if self.allocation_dict[ticker] > 0:  # In position
-                    stop_loss_price = self.entry_price[ticker] * 0.9  # 10% stop-loss
-                    if ohlcv[-1]['close'] < stop_loss_price:
-                        self.allocation_dict[ticker] = 0  # Liquidate position at stop-loss
-
-
-            except KeyError:
-                pass  # Ignore missing data for tickers
-            except Exception:
-                pass  # Ignore other errors
-
+        # Check for crossover signals
+        if ema9[-1] > ema21[-1] and ema9[-2] <= ema21[-2]:
+            # Enter buy position
+            self.allocation_dict[self.ticker] = 1.0  # Allocate full position to TSLA
+        elif ema21[-1] > ema9[-1] and ema21[-2] <= ema9[-2]:
+            # Liquidate position
+            self.allocation_dict[self.ticker] = 0  # No allocation to TSLA
+        
         return TargetAllocation(self.allocation_dict)
