@@ -5,7 +5,7 @@ from surmount.technical_indicators import EMA, MACD, RSI, BB, SO, ATR, PSAR, OBV
 class TradingStrategy(Strategy):
     def __init__(self):
         # Define the tickers we will be trading
-        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.tickers = ["AAPL", "MSFT", "NVDA"]#, "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
         # Initial allocation of $3000 across the assets, can be adjusted based on strategy requirements
         self.initial_investment = 3000
 
