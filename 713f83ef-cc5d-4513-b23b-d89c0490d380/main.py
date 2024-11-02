@@ -1,8 +1,8 @@
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import RSI, EMA, BB
 from .macd import MACD  # Import the MACD function from the macd module
-from .atr import calculate_atr  # Import the ATR calculation function
-from .adx import calculate_adx  # Import the ADX calculation function
+from atr import calculate_atr  # Import the ATR calculation function
+from adx import calculate_adx  # Import the ADX calculation function
 
 class TradingStrategy(Strategy):
     def __init__(self):
