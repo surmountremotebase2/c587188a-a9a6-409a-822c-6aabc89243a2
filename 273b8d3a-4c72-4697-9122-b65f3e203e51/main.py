@@ -1,45 +1,55 @@
-# Import necessary libraries
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import EMA
+from surmount.logging import log
 
 class TradingStrategy(Strategy):
+
     def __init__(self):
-        # Define ticker for the strategy
-        self.ticker = "TSLA"
-        # Allocation dict to track position for the asset 
-        self.allocation_dict = {self.ticker: 0}
+        self.tickers = ["TSLA"]
+        self.data_list = []  # Assuming we don't need additional data sources
 
     @property
     def interval(self):
-        # Use 1-hour interval for the strategy
-        return "1hour"
+        return "1day"  # You can change the interval as needed
 
     @property
     def assets(self):
-        # Return the list of tickers
-        return [self.ticker]
+        return self.tickers
+
+    @property
+    def data(self):
+        return self.data_list
 
     def run(self, data):
-        # Access OHLCV data for TSLA
-        ohlcv_data = [entry for entry in data["ohlcv"] if entry['ticker'] == self.ticker]
-        
-        # Ensure we have enough data points for EMA
-        if len(ohlcv_data) < 21:
-            return TargetAllocation(self.allocation_dict)  # Not enough data to compute EMA
+        allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocation
+        ohlcv = data.get("ohlcv")  # Get OHLCV data for analysis
 
-        # Convert OHLCV data into a format suitable for EMA calculation
-        close_prices = [entry['close'] for entry in ohlcv_data]  # Assuming 'close' is part of the ohlcv structure
+        # Check if we have enough data to calculate EMAs
+        if len(ohlcv) < 21:
+            return TargetAllocation(allocation_dict)  # Not enough data to make a decision
 
-        # Calculate EMA9 and EMA21
-        ema9 = EMA(self.ticker, close_prices, period=9)
-        ema21 = EMA(self.ticker, close_prices, period=21)
+        # Calculate the closing prices for TSLA
+        close_prices = [entry['TSLA']['close'] for entry in ohlcv]
 
-        # Check for crossover signals
+        # Calculate EMA 9 and EMA 21
+        ema9 = EMA("TSLA", close_prices, period=9)
+        ema21 = EMA("TSLA", close_prices, period=21)
+
+        # Check if EMAs have enough data points to evaluate
+        if len(ema9) < 2 or len(ema21) < 2:
+            return TargetAllocation(allocation_dict)  # Not enough data to calculate EMAs
+
+        # Log the latest EMA values for debugging
+        log(f"Latest EMA9: {ema9[-1]}, Latest EMA21: {ema21[-1]}")
+
+        # Entry and exit logic
         if ema9[-1] > ema21[-1] and ema9[-2] <= ema21[-2]:
-            # Enter buy position
-            self.allocation_dict[self.ticker] = 1.0  # Allocate full position to TSLA
+            # Buy signal: EMA9 crosses above EMA21
+            allocation_dict["TSLA"] = 1.0  # Allocate full position to TSLA
+            log("Buy signal generated.")
         elif ema21[-1] > ema9[-1] and ema21[-2] <= ema9[-2]:
-            # Liquidate position
-            self.allocation_dict[self.ticker] = 0  # No allocation to TSLA
-        
-        return TargetAllocation(self.allocation_dict)
+            # Sell signal: EMA21 crosses above EMA9
+            allocation_dict["TSLA"] = 0  # Liquidate position
+            log("Sell signal generated.")
+
+        return TargetAllocation(allocation_dict)
