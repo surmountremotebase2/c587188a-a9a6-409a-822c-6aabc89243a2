@@ -26,9 +26,9 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 14)  # RSI with a period of 14
-            ema9 = EMA(ticker, ohlcv, 9)
-            ema21 = EMA(ticker, ohlcv, 21)
+            rsi_data = RSI(ticker, ohlcv, 10)  # RSI with a period of 14
+            ema9 = EMA(ticker, ohlcv, 5)
+            ema21 = EMA(ticker, ohlcv, 13)
             bb_data = BB(ticker, ohlcv, 20)
             atr = calculate_atr(ohlcv, 14)  # Calculate ATR
             adx = calculate_adx(ohlcv, 14)  # Calculate ADX
