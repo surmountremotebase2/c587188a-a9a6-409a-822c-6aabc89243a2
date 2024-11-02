@@ -24,9 +24,9 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 14)  # RSI with a period of 14
-            ema9 = EMA(ticker, ohlcv, 9)
-            ema21 = EMA(ticker, ohlcv, 21)
+            rsi_data = RSI(ticker, ohlcv, 10)  # RSI with a period of 14
+            ema9 = EMA(ticker, ohlcv, 7)
+            ema21 = EMA(ticker, ohlcv, 15)
             bb_data = BB(ticker, ohlcv, 20)
 
             if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['upper']) < 1:
