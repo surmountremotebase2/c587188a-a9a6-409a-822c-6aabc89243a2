@@ -47,8 +47,8 @@ class TradingStrategy(Strategy):
                 allocation_dict[ticker] += self.initial_allocation  # Buy with equal allocation
 
             # Liquidation Conditions
-            elif ((current_close >= current_bb_upper and current_macd < current_signal) or  # Price touches BB upper or MACD condition
-                  (current_macd < current_signal and current_ema9 < current_ema21 and current_rsi < 45)):  # All conditions met for liquidation
+            elif ((current_close >= current_bb_upper or current_macd < current_signal) or  # Price touches BB upper or MACD condition
+                  (current_macd < current_signal and (current_ema9 < current_ema21 or current_rsi < 45))):  # All conditions met for liquidation
                 allocation_dict[ticker] = 0  # Liquidate the stock
 
         # Normalize allocations (though only equal or zero allocations will be present)
