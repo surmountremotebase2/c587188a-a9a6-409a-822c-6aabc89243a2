@@ -27,7 +27,12 @@ class TradingStrategy(Strategy):
         for ticker in self.tickers:
             ema_9 = EMA(ticker, ohlcv, 9)[-1]
             ema_21 = EMA(ticker, ohlcv, 21)[-1]
+            
+            # Extract MACD values correctly
             macd = MACD(ticker, ohlcv, fast=12, slow=26)
+            macd_line = macd['macd'][-1]  # Get the most recent MACD value
+            signal_line = macd['signal'][-1]  # Get the most recent signal line value
+
             rsi = RSI(ticker, ohlcv, length=14)[-1]
             bb = BB(ticker, ohlcv, length=20)
             stochastic = SO(ticker, ohlcv)
@@ -36,21 +41,19 @@ class TradingStrategy(Strategy):
 
             buy_conditions = [
                 ema_9 > ema_21,                        # EMA condition
-                macd['macd'] > macd['signal'],        # MACD condition
+                macd_line > signal_line,               # MACD condition (correctly references macd_line and signal_line)
                 rsi < 30,                              # RSI condition
                 ohlcv[-1][ticker]['close'] < bb['lower'][-1],  # Bollinger Bands condition
                 stochastic['%K'][-1] > stochastic['%D'][-1],    # Stochastic condition
                 obv > obv[-2]                          # OBV condition
             ]
 
-            # Entry Conditions for a Buy Position
             if sum(buy_conditions) >= 5:  # Check if at least 5 out of 6 conditions are met
                 allocation_dict[ticker] = 1 / len(self.tickers)  # Equal allocation for all assets
 
-            # Exit Conditions for Liquidating Positions
             sell_conditions = [
                 ema_9 < ema_21,                         # EMA condition
-                macd['macd'] < macd['signal'],         # MACD condition
+                macd_line < signal_line,                # MACD condition
                 rsi > 70,                               # RSI condition
                 ohlcv[-1][ticker]['close'] > bb['upper'][-1],  # Bollinger Bands condition
                 stochastic['%K'][-1] < stochastic['%D'][-1],     # Stochastic condition
