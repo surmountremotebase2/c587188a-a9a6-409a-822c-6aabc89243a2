@@ -25,16 +25,15 @@ class TradingStrategy(Strategy):
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
             rsi_data = RSI(ticker, ohlcv, 14)   # RSI with a period of 14
-            ema9 = EMA(ticker, ohlcv, 9)        # EMA with a period of 7/9
-            ema21 = EMA(ticker, ohlcv, 21)      # EMA with a period of 15/21
-            bb_data = BB(ticker, ohlcv, 20, 2)     # Bollinger Bands length 20 std 2
+            ema9 = EMA(ticker, ohlcv, 9)        # EMA with a period of 9
+            ema21 = EMA(ticker, ohlcv, 21)      # EMA with a period of 21
+            bb_data = BB(ticker, ohlcv, 20, 2)  # Bollinger Bands length 20 std 2
             adx = ADX(ticker, ohlcv, 14)        # Calculate ADX from surmount
-
 
             if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['upper']) < 1:
                 continue
 
-            # Set current value for RSI, EMA, BB, ADX 
+            # Set current values for RSI, EMA, BB, ADX 
             current_rsi = rsi_data[-1]
             current_ema9 = ema9[-1]
             current_ema21 = ema21[-1]
@@ -43,7 +42,6 @@ class TradingStrategy(Strategy):
             current_bb_upper = bb_data['upper'][-1]
             current_adx = adx[-1]
 
-            #
             macd_line, signal_line = MACD(close_prices)
             current_macd = macd_line[-1]
             current_signal = signal_line[-1]
@@ -54,8 +52,8 @@ class TradingStrategy(Strategy):
                 holding_dict[ticker] = 0  # Reset holding amount
 
             # Investment Conditions
-            if (current_close <= current_bb_lower or \
-                (current_ema9 > current_ema21 and current_adx > 20)
+            if (current_close <= current_bb_lower or
+                (current_ema9 > current_ema21 and current_adx > 20) or
                 (current_ema9 > current_ema21 and current_rsi > 52 and current_adx > 20) or
                 (current_rsi < 30 and current_adx > 20) or
                 (current_macd > current_signal and current_rsi > 52 and current_adx > 20)):
@@ -66,9 +64,9 @@ class TradingStrategy(Strategy):
             current_value = holding_dict[ticker] * current_close
             liquidate_value = allocation_dict[ticker] * 1.05  # The value to compare against
 
-            if (current_signal > current_macd and current_rsi < 48 and and current_adx > 20) or \
-               (current_ema21 > current_ema9 and current_rsi < 48 and and current_adx > 20) or \
-               (current_rsi > 70 and and current_adx > 20) or \
+            if (current_signal > current_macd and current_rsi < 48 and current_adx > 20) or \
+               (current_ema21 > current_ema9 and current_rsi < 48 and current_adx > 20) or \
+               (current_rsi > 70 and current_adx > 20) or \
                (current_close >= current_bb_upper):
                 if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
                     allocation_dict[ticker] = 0  # Liquidate the stock
