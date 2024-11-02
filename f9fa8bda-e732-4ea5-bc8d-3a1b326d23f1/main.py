@@ -5,7 +5,7 @@ from surmount.technical_indicators import EMA, MACD, RSI, ATR
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META"]#, "AMZN", "GOOGL", "NFLX", "TSLA"]
         self.initial_investment = 3000
 
     @property
