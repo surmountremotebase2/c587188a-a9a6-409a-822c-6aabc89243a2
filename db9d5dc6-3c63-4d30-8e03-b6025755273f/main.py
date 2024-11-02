@@ -36,7 +36,7 @@ class TradingStrategy:
 
         # Entry conditions
         if (
-            (current_macd > current_signal and current_ema9 > current_ema21 and current_rsi < 49) or
+            (current_macd > current_signal and current_ema9 > current_ema21 and current_rsi < 40) or
             (current_price <= lower_band) or
             (current_rsi < 30)
         ):
@@ -44,7 +44,7 @@ class TradingStrategy:
 
         # Exit conditions
         if (
-            (current_signal > current_macd and current_ema21 > current_ema9 and current_rsi > 52) or
+            (current_signal > current_macd and current_ema21 > current_ema9 and current_rsi > 60) or
             (current_price >= upper_band) or
             (current_rsi >= 70)
         ):
