@@ -2,9 +2,9 @@ import pandas as pd
 from .macd import MACD  # Import the MACD function from macd.py
 from surmount import technical_indicators
 
-class TradingStrategy:
-    def __init__(self, tickers):
-        self.tickers = tickers
+class TradingStrategy(Strategy):
+    def __init__(self):
+        self.tickers = ["AAPL"]#, "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
         self.total_investment = 2000  # Updated total investment amount
         self.allocation = self.total_investment / len(tickers)  # Equal allocation
         self.positions = {ticker: 0 for ticker in tickers}
