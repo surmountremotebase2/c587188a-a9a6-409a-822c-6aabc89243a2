@@ -6,7 +6,7 @@ class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
             "AAPL", "MSFT", "WMT", "JPM", "NVDA", "AMD", "META", "TSLA",
-            "AMZN", "GOOGL", "LMT", "NOC", "GC", "BAC", "GS", "PFE", "JNJ", "FDX", "UNP"
+            "AMZN", "GOOGL", "LMT", "NOC", "BAC", "GS", "PFE", "JNJ", "FDX", "UNP"
         ]  # Adjusted tickers as needed
         self.total_investment = 3000  # Total investment amount is $3,000
         self.investment_rate = 0.3  # Rate at which to invest (30%)
