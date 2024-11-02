@@ -6,12 +6,11 @@ class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
             "AAPL", "MSFT", "WMT", "JPM", "NVDA", "AMD", "META", "TSLA",
-            "AMZN", "GOOGL", "LMT", "NOC", "GS", "BAC", "GS", "PFE", "JNJ", "FDX", "UNP"
+            "AMZN", "GOOGL", "LMT", "NOC", "GC", "BAC", "GS", "PFE", "JNJ", "FDX", "UNP"
         ]  # Adjusted tickers as needed
         self.total_investment = 3000  # Total investment amount is $3,000
-        self.investment_rate = 0.5  # Rate at which to invest (50%)
+        self.investment_rate = 0.3  # Rate at which to invest (30%)
         self.initial_allocation = self.total_investment * self.investment_rate / len(self.tickers)  # Equal allocation per ticker
-        self.holding_values = {ticker: 0 for ticker in self.tickers}  # Track holding values
 
     @property
     def interval(self):
@@ -23,6 +22,7 @@ class TradingStrategy(Strategy):
 
     def run(self, data):
         allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocations to zero
+        holding_dict = {ticker: 0 for ticker in self.tickers}  # Track holding amounts
         ohlcv = data.get("ohlcv")
 
         for ticker in self.tickers:
@@ -46,34 +46,30 @@ class TradingStrategy(Strategy):
             current_macd = macd_line[-1]
             current_signal = signal_line[-1]
 
+            # Stop-loss condition: Liquidate if current price drops more than 5% from holding value
+            if holding_dict[ticker] > 0 and current_close < (holding_dict[ticker] * 0.95):
+                allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
+                holding_dict[ticker] = 0  # Reset holding amount
+
             # Investment Conditions
             if (current_close <= current_bb_lower or
                 current_ema9 > current_ema21 or
-                (current_ema9 > current_ema21 and current_rsi > 51) or
+                (current_ema9 > current_ema21 and current_rsi > 52) or
                 (current_rsi < 30) or
-                (current_macd > current_signal and current_rsi > 50)):
-                allocation_dict[ticker] += self.initial_allocation  # Invest 50% of initial investment
-                self.holding_values[ticker] += self.initial_allocation  # Track the value of the holdings
+                (current_macd > current_signal and current_rsi > 52)):
+                allocation_dict[ticker] += self.initial_allocation  # Invest 30% of initial investment
+                holding_dict[ticker] += self.initial_allocation / current_close  # Update holding amount
 
             # Liquidation Conditions
-            liquidate_value = current_close * (allocation_dict[ticker] / self.initial_allocation)
+            current_value = holding_dict[ticker] * current_close
+            liquidate_value = allocation_dict[ticker]  # The value to compare against
 
-            if (allocation_dict[ticker] > 0 and  # Check if there is an existing allocation
-                (liquidate_value < self.holding_values[ticker] or
-                 (current_signal > current_macd and current_rsi < 49) or
-                 (current_ema21 > current_ema9 and current_rsi < 50) or
-                 (current_close >= current_bb_upper))):
-                continue  # Skip liquidation if current value is less than held value
-
-            # Stop-Loss Condition
-            if allocation_dict[ticker] > 0:  # Only check if holding the stock
-                purchase_price = self.holding_values[ticker] / (self.initial_allocation / current_close) if self.holding_values[ticker] > 0 else 0
-                if current_close < purchase_price * 0.95:  # Check if the price drops more than 5%
-                    allocation_dict[ticker] = 0  # Liquidate due to stop-loss
-
-            # Liquidate the stock
-            if allocation_dict[ticker] > 0:  # Only liquidate if there are shares held
-                allocation_dict[ticker] = 0  # Liquidate the stock
+            if (current_signal > current_macd and current_rsi < 48) or \
+               (current_ema21 > current_ema9 and current_rsi < 48) or \
+               (current_close >= current_bb_upper):
+                if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
+                    allocation_dict[ticker] = 0  # Liquidate the stock
+                    holding_dict[ticker] = 0  # Reset holding amount
 
         # Return the target allocation
         return TargetAllocation(allocation_dict)
