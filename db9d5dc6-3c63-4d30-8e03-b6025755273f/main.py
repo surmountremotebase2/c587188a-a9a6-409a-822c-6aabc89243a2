@@ -4,8 +4,8 @@ from .macd import MACD  # Import the MACD function from the macd module
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL"]#, "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
-        self.total_investment = 3000  # Total investment amount
+        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.total_investment = 2000  # Total investment amount updated to $2,000
         self.initial_allocation = self.total_investment / len(self.tickers)  # Equal allocation per ticker
 
     @property
@@ -42,17 +42,13 @@ class TradingStrategy(Strategy):
             current_signal = signal_line[-1]
 
             # Entry Conditions to Buy
-            if (current_close <= current_bb_lower or
-                current_macd > current_signal and
-                current_ema9 > current_ema21 and
-                current_rsi > 65):  # All conditions met for buying
+            if ((current_close <= current_bb_lower and current_macd > current_signal) or  # Price touches BB lower or MACD condition
+                (current_macd > current_signal and current_ema9 > current_ema21 and current_rsi > 65)):  # All conditions met for buying
                 allocation_dict[ticker] += self.initial_allocation  # Buy with equal allocation
 
             # Liquidation Conditions
-            elif (current_close >= current_bb_upper or
-                  current_macd < current_signal and
-                  current_ema9 < current_ema21 and
-                  current_rsi < 45):  # All conditions met for liquidation
+            elif ((current_close >= current_bb_upper and current_macd < current_signal) or  # Price touches BB upper or MACD condition
+                  (current_macd < current_signal and current_ema9 < current_ema21 and current_rsi < 45)):  # All conditions met for liquidation
                 allocation_dict[ticker] = 0  # Liquidate the stock
 
         # Normalize allocations (though only equal or zero allocations will be present)
