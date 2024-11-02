@@ -43,10 +43,10 @@ class TradingStrategy(Strategy):
         if ema9[-1] > ema21[-1] and ema9[-2] <= ema21[-2]:
             # Buy signal: EMA9 crosses above EMA21
             allocation_dict["TSLA"] = 1.0  # Allocate full position to TSLA
-            log("Buy signal generated.")
+            #log("Buy signal generated.")
         elif ema21[-1] > ema9[-1] and ema21[-2] <= ema9[-2]:
             # Sell signal: EMA21 crosses above EMA9
             allocation_dict["TSLA"] = 0  # Liquidate position
-            log("Sell signal generated.")
+            #log("Sell signal generated.")
 
         return TargetAllocation(allocation_dict)
