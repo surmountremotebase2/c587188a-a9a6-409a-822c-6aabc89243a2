@@ -54,14 +54,15 @@ class TradingStrategy(Strategy):
             # Investment Conditions
             if (current_close <= current_bb_lower or
                 current_ema9 > current_ema21 or
-                (current_ema9 > current_ema21 and current_rsi > 51) or
-                (current_rsi < 30) or
-                (current_macd > current_signal and current_rsi > 51)):
+                (current_ema9 > current_ema21 and current_rsi > 55) or
+                (current_rsi < 30) or (current_adx > 20) or
+                (current_macd > current_signal and current_rsi > 55)):
                 allocation_dict[ticker] += 1.0 / len(self.tickers)  # Invest equally among tickers
                 holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
             # Liquidation Conditions
             current_value = holding_dict[ticker] * current_close
+            liquidate_value = allocation_dict[ticker] * 1.1  # The value to compare against
 
             # ADX exit condition
             if current_adx < 20:  # If ADX drops below 20, indicating a weak trend
@@ -71,10 +72,16 @@ class TradingStrategy(Strategy):
             # +DI and -DI crossing exit condition
             plus_di = 100 * (holding_dict[ticker] / atr[-1])  # Assuming you have these values; modify as needed
             minus_di = 100 * (holding_dict[ticker] / atr[-1])  # Assuming you have these values; modify as needed
-            
-            if current_value > 0 and plus_di < minus_di:  # If +DI crosses below -DI
-                allocation_dict[ticker] = 0  # Liquidate the stock
-                holding_dict[ticker] = 0  # Reset holding amount
+
+
+            if (current_signal > current_macd and current_rsi < 49) or \
+               (current_ema21 > current_ema9 and current_rsi < 49) or \
+               (current_close >= current_bb_upper) or \
+               (current_value > 0 and plus_di < minus_di):
+                if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
+                    allocation_dict[ticker] = 0  # Liquidate the stock
+                    holding_dict[ticker] = 0  # Reset holding amount
+
 
         # Return the target allocation
         return TargetAllocation(allocation_dict)
