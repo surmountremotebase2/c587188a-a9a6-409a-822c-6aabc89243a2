@@ -39,16 +39,16 @@ class TradingStrategy(Strategy):
                 continue  # Not enough data to calculate EMAs
 
             # Log the latest EMA values
-            log(f"Latest {ticker} EMA9: {ema9[-1]}, Latest EMA21: {ema21[-1]}")
+            #log(f"Latest {ticker} EMA9: {ema9[-1]}, Latest EMA21: {ema21[-1]}")
 
             # Entry and exit logic
             if ema9[-1] > ema21[-1] and ema9[-2] <= ema21[-2]:
                 # Buy signal: EMA9 crosses above EMA21
                 allocation_dict[ticker] = 1.0  # Allocate full position to this ticker
-                log(f"Buy signal generated for {ticker}.")
+                #log(f"Buy signal generated for {ticker}.")
             elif ema21[-1] > ema9[-1] and ema21[-2] <= ema9[-2]:
                 # Sell signal: EMA21 crosses above EMA9
                 allocation_dict[ticker] = 0  # Liquidate position
-                log(f"Sell signal generated for {ticker}.")
+                #log(f"Sell signal generated for {ticker}.")
 
         return TargetAllocation(allocation_dict)
