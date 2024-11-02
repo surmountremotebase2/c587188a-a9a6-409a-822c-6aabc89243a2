@@ -6,8 +6,8 @@ from .macd import MACD  # Import the MACD function from the macd module
 class TradingStrategy(Strategy):
 
     def __init__(self):
-        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
-        self.total_investment = 2000
+        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META"]
+        self.total_investment = 3000
         self.data_list = []  # Placeholder for data classes
 
     @property
@@ -43,14 +43,15 @@ class TradingStrategy(Strategy):
                     log(f"{ticker}: Sell Signal (MACD)")
 
             # RSI Signals
-            if rsi_data and len(rsi_data) > 1:
-                current_rsi = rsi_data[-1]['rsi']  # Adjust based on expected structure
-                rsi_prev = rsi_data[-2]['rsi']
-                if current_rsi < 35 and rsi_prev < current_rsi:
-                    log(f"{ticker}: Buy Signal (RSI)")
+            if rsi_data:
+                current_rsi = rsi_data[-1]  # Adjust based on expected structure
+                rsi_prev = rsi_data[-2] if len(rsi_data) > 1 else None  # Ensure there's a previous RSI value
+                if current_rsi is not None:
+                    if current_rsi < 35 and (rsi_prev is None or rsi_prev < current_rsi):
+                        log(f"{ticker}: Buy Signal (RSI)")
 
-                if current_rsi > 65 and rsi_prev > current_rsi:
-                    log(f"{ticker}: Sell Signal (RSI)")
+                    if current_rsi > 65 and (rsi_prev is None or rsi_prev > current_rsi):
+                        log(f"{ticker}: Sell Signal (RSI)")
 
             # EMA Signals
             if ema_short and ema_long and len(ema_short) > 1 and len(ema_long) > 1:
