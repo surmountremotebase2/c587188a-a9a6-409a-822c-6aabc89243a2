@@ -24,10 +24,10 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 10)   # RSI with a period of 14
-            ema9 = EMA(ticker, ohlcv, 7)        # EMA with a period of 7/9
-            ema21 = EMA(ticker, ohlcv, 17)      # EMA with a period of 15/21
-            bb_data = BB(ticker, ohlcv, 20)
+            rsi_data = RSI(ticker, ohlcv, 14)   # RSI with a period of 14
+            ema9 = EMA(ticker, ohlcv, 9)        # EMA with a period of 7/9
+            ema21 = EMA(ticker, ohlcv, 21)      # EMA with a period of 15/21
+            bb_data = BB(ticker, ohlcv, 20, 2)     # Bollinger Bands length 20 std 2
             adx = ADX(ticker, ohlcv, 14)        # Calculate ADX from surmount
 
 
@@ -55,11 +55,10 @@ class TradingStrategy(Strategy):
 
             # Investment Conditions
             if (current_close <= current_bb_lower or
-                current_ema9 > current_ema21 or
-                (current_ema9 > current_ema21 and current_rsi > 52) or
-                (current_rsi < 30) or
-                (current_adx > 25) or
-                (current_macd > current_signal and current_rsi > 52)):
+                (current_ema9 > current_ema21 and current_adx > 20)
+                (current_ema9 > current_ema21 and current_rsi > 52 and current_adx > 20) or
+                (current_rsi < 30 and current_adx > 20) or
+                (current_macd > current_signal and current_rsi > 52 and current_adx > 20)):
                 allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
                 holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
@@ -67,10 +66,9 @@ class TradingStrategy(Strategy):
             current_value = holding_dict[ticker] * current_close
             liquidate_value = allocation_dict[ticker] * 1.05  # The value to compare against
 
-            if (current_signal > current_macd and current_rsi < 48) or \
-               (current_ema21 > current_ema9 and current_rsi < 48) or \
-               (current_rsi > 70) or \
-               (current_adx < 18) or \
+            if (current_signal > current_macd and current_rsi < 48 and and current_adx > 20) or \
+               (current_ema21 > current_ema9 and current_rsi < 48 and and current_adx > 20) or \
+               (current_rsi > 70 and and current_adx > 20) or \
                (current_close >= current_bb_upper):
                 if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
                     allocation_dict[ticker] = 0  # Liquidate the stock
