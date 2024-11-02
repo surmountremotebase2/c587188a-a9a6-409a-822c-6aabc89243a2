@@ -42,11 +42,11 @@ class TradingStrategy(Strategy):
             if (current_rsi is not None and len(current_rsi) > 0) and (ema9 is not None and ema21 is not None and len(ema9) > 0 and len(ema21) > 0):
                 # Get the most recent RSI value
                 latest_rsi = current_rsi[-1]
-                if ema9[-1] > ema21[-1] or latest_rsi > 63:
+                if ema9[-1] > ema21[-1] or latest_rsi > 65:
                     # EMA9 > EMA21, RSI>65, fully invest (1)
                     allocation_dict[ticker] = self.initial_investment / len(self.tickers)
                     #log(f"Investing in {ticker}: ${allocation_dict[ticker]:.2f}")
-                elif ema9[-1] < ema21[-1] or latest_rsi < 37:
+                elif ema9[-1] < ema21[-1] or latest_rsi < 35:
                     # EMA9 < EMA21, RSI < 45, liquidate (0)
                     allocation_dict[ticker] = 0
                     #log(f"Liquidating position for {ticker}")
