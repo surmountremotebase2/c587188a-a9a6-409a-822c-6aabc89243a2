@@ -52,9 +52,6 @@ class TradingStrategy(Strategy):
                     if ohlcv[-1]['close'] < stop_loss_price:
                         self.allocation_dict[ticker] = 0  # Liquidate position at stop-loss
 
-                # Exit if ATR is greater than zero
-                if self.allocation_dict[ticker] > 0 and atr > 0:
-                    self.allocation_dict[ticker] = 0  # Liquidate position if ATR > 0
 
             except KeyError:
                 pass  # Ignore missing data for tickers
