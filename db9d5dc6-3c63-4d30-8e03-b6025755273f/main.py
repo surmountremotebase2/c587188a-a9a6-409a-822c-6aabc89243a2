@@ -1,77 +1,70 @@
-import pandas as pd
-from .macd import MACD  # Import the MACD function from macd.py
-from surmount import technical_indicators  # Import technical indicators
-from surmount.base_class import Strategy  # Import the Strategy base class
+from surmount.base_class import Strategy, TargetAllocation
+from surmount.technical_indicators import RSI, EMA, BB
+from .macd import MACD  # Import the MACD function from the macd module
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        super().__init__()  # Call the constructor of the base class
-        self.tickers = ["AAPL"]  # Uncomment other tickers when needed
-        self.total_investment = 2000  # Updated total investment amount
-        self.allocation = self.total_investment / len(self.tickers)  # Equal allocation
-        self.positions = {ticker: 0 for ticker in self.tickers}
-
-    @property
-    def assets(self):
-        """Return the assets to trade."""
-        return self.tickers
+        self.tickers = ["AAPL", "MSFT"]  # Consider uncommenting other tickers for more diversification
+        self.total_investment = 2000  # Total investment amount of $2,000
+        self.initial_allocation = self.total_investment / len(self.tickers)  # Initial equal allocation per ticker
+        self.max_allocation = self.total_investment  # Maximum total investment
 
     @property
     def interval(self):
-        """Return the trading interval (e.g., '1hour')."""
-        return '1hour'  # Updated to '1hour'
+        return "1hour"
 
-    def get_ohlcv_data(self, ticker):
-        # Placeholder for data retrieval function, replace with actual method
-        pass
+    @property
+    def assets(self):
+        return self.tickers
 
-    def generate_signals(self, ticker, data):
-        close_prices = [item['close'] for item in data]
-        
-        # Calculate technical indicators
-        macd_line, signal_line = MACD(close_prices)  # Use the MACD function from macd.py
-        ema9 = technical_indicators.EMA(ticker, data, length=9)
-        ema21 = technical_indicators.EMA(ticker, data, length=21)
-        rsi = technical_indicators.RSI(ticker, data, length=14)  # RSI set to 14
-        bollinger_bands = technical_indicators.BB(ticker, data, length=20, std=2)
+    def run(self, data):
+        allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocations to zero
+        ohlcv = data.get("ohlcv")
 
-        # Extract current values
-        current_macd = macd_line[-1]
-        current_signal = signal_line[-1]
-        current_ema9 = ema9[-1]
-        current_ema21 = ema21[-1]
-        current_rsi = rsi[-1]
-        current_price = close_prices[-1]
-        lower_band = bollinger_bands['lower'][-1]
-        upper_band = bollinger_bands['upper'][-1]
-
-        # Entry conditions
-        if (
-            (current_macd > current_signal and current_ema9 > current_ema21 and current_rsi < 40) or
-            (current_price <= lower_band) or  # Price touches or goes below the lower Bollinger Band
-            (current_rsi < 30)  # RSI condition for buy
-        ):
-            return 'buy'
-
-        # Exit conditions
-        if (
-            (current_signal > current_macd and current_ema21 > current_ema9 and current_rsi > 60) or
-            (current_price >= upper_band) or  # Price touches or goes above the upper Bollinger Band
-            (current_rsi >= 70)  # RSI condition for sell
-        ):
-            return 'sell'
-
-        return 'hold'
-
-    def run(self, start_date, end_date):
         for ticker in self.tickers:
-            data = self.get_ohlcv_data(ticker)  # Fetch data for each ticker
-            signal = self.generate_signals(ticker, data)
+            close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
+            if len(close_prices) < 20:  # Ensure there is enough data for the indicators
+                continue
 
-            if signal == 'buy' and self.positions[ticker] == 0:
-                self.positions[ticker] = self.allocation / data[-1]['close']
-                print(f"Bought {ticker} with {self.allocation} at {data[-1]['close']}")
-            elif signal == 'sell' and self.positions[ticker] > 0:
-                proceeds = self.positions[ticker] * data[-1]['close']
-                print(f"Sold {ticker} for {proceeds} at {data[-1]['close']}")
-                self.positions[ticker] = 0
+            # Calculate indicators
+            rsi_data = RSI(ticker, ohlcv, 14)  # Use 14-period RSI
+            ema9 = EMA(ticker, ohlcv, 9)
+            ema21 = EMA(ticker, ohlcv, 21)
+            bb_data = BB(ticker, ohlcv, 20)
+
+            if not rsi_data or not ema9 or not ema21 or not bb_data['upper']:
+                continue  # Skip if any indicator returns insufficient data
+
+            # Get the latest values
+            current_rsi = rsi_data[-1]
+            current_ema9 = ema9[-1]
+            current_ema21 = ema21[-1]
+            current_close = close_prices[-1]
+            current_bb_upper = bb_data['upper'][-1]
+            current_bb_lower = bb_data['lower'][-1]
+
+            # Calculate MACD
+            macd_line, signal_line = MACD(close_prices)
+            if not macd_line or not signal_line:
+                continue  # Skip if MACD calculation fails
+
+            current_macd = macd_line[-1]
+            current_signal = signal_line[-1]
+
+            # Entry Conditions to Buy (incremental)
+            if (current_close <= current_bb_lower or
+                current_macd > current_signal or
+                current_ema9 > current_ema21 or
+                current_rsi > 65):
+                # Incrementally increase allocation
+                current_allocation = allocation_dict[ticker]
+                additional_allocation = self.initial_allocation * 0.5  # Incremental buy (50% of initial allocation)
+                new_allocation = min(current_allocation + additional_allocation, self.max_allocation / len(self.tickers))
+                allocation_dict[ticker] = new_allocation
+
+            # Liquidation Conditions to Sell
+            elif current_signal > current_macd:
+                allocation_dict[ticker] = 0  # Liquidate the stock
+
+        # Return the target allocation
+        return TargetAllocation(allocation_dict)
