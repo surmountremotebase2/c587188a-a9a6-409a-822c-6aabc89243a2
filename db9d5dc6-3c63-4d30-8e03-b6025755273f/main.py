@@ -41,9 +41,10 @@ class TradingStrategy(Strategy):
             current_signal = signal_line[-1]
 
             # Entry Conditions to Buy
-            if current_macd > current_signal or current_ema9 > current_ema21 or  # 1st condition
-                current_close <= bb_data['lower'][-1]  or               # 2nd condition: Price touches or is below the lower BB
-                current_rsi < 30:                                       # 3rd condition: RSI(17) < 30
+            if (current_close <= current_bb_lower or
+                current_macd > current_signal or
+                current_ema9 > current_ema21 or
+                current_rsi > 65):  # All conditions met for buying
                 allocation_dict[ticker] += self.initial_allocation  # Buy with equal allocation
 
             # Liquidation Conditions to Sell
