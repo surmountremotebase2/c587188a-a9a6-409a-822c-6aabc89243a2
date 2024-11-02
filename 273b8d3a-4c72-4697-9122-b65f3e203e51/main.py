@@ -1,6 +1,6 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import EMA
 from surmount.logging import log
+from surmount.technical_indicators import EMA  # Import the EMA function
 
 class TradingStrategy(Strategy):
 
@@ -28,12 +28,9 @@ class TradingStrategy(Strategy):
         if len(ohlcv) < 21:
             return TargetAllocation(allocation_dict)  # Not enough data to make a decision
 
-        # Calculate the closing prices for TSLA
-        close_prices = [entry['TSLA']['close'] for entry in ohlcv]
-
-        # Calculate EMA 9 and EMA 21
-        ema9 = EMA("TSLA", close_prices, period=9)
-        ema21 = EMA("TSLA", close_prices, period=21)
+        # Calculate EMA 9 and EMA 21 using the provided EMA function
+        ema9 = EMA("TSLA", ohlcv, length=9)
+        ema21 = EMA("TSLA", ohlcv, length=21)
 
         # Check if EMAs have enough data points to evaluate
         if len(ema9) < 2 or len(ema21) < 2:
