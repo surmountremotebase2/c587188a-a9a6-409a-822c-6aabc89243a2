@@ -8,8 +8,6 @@ class TradingStrategy(Strategy):
             "AAPL", "MSFT", "WMT", "JPM", "NVDA", "AMD", "META", "TSLA",
             "AMZN", "GOOGL", "LMT", "NOC", "BAC", "GS", "PFE", "JNJ", "FDX", "UNP"
         ]  # Adjusted tickers as needed
-        self.total_investment = 3000  # Total investment amount is $3,000
-        self.investment_rate = 0.25  # Rate at which to invest (25%)
 
     @property
     def interval(self):
