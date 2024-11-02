@@ -4,8 +4,8 @@ from .macd import MACD  # Import the MACD function from the macd module
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL", "MSFT"]#, "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
-        self.total_investment = 2000  # Total investment amount updated to $2,000
+        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.total_investment = 2000  # Total investment amount is $2,000
         self.initial_allocation = self.total_investment / len(self.tickers)  # Equal allocation per ticker
 
     @property
@@ -22,19 +22,18 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 4)
+            rsi_data = RSI(ticker, ohlcv, 17)  # Updated RSI to use a 17-day period
             ema9 = EMA(ticker, ohlcv, 9)
             ema21 = EMA(ticker, ohlcv, 21)
             bb_data = BB(ticker, ohlcv, 20)
 
-            if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['lower']) < 1:
+            if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['upper']) < 1:
                 continue
 
             current_rsi = rsi_data[-1]
             current_ema9 = ema9[-1]
             current_ema21 = ema21[-1]
             current_close = close_prices[-1]
-            current_bb_lower = bb_data['lower'][-1]
             current_bb_upper = bb_data['upper'][-1]
 
             macd_line, signal_line = MACD(close_prices)
@@ -42,14 +41,16 @@ class TradingStrategy(Strategy):
             current_signal = signal_line[-1]
 
             # Entry Conditions to Buy
-            if ((current_close <= current_bb_lower or current_macd > current_signal) and  # Price touches BB lower or MACD condition
-                (current_ema9 > current_ema21 and current_rsi > 65)):  # All conditions met for buying
+            if ((current_macd > current_signal and current_ema9 > current_ema21 and current_rsi < 49) or  # 1st condition
+                (current_close <= bb_data['lower'][-1]) or  # 2nd condition: Price touches or is below the lower BB
+                (current_rsi <= 30)):  # 3rd condition: RSI(17) < 30
                 allocation_dict[ticker] += self.initial_allocation  # Buy with equal allocation
 
-            # Liquidation Conditions
-            elif ((current_close >= current_bb_upper or current_macd < current_signal) and  # Price touches BB upper or MACD condition
-                  (current_ema9 < current_ema21 or current_rsi < 45)):  # All conditions met for liquidation
+            # Liquidation Conditions to Sell
+            elif ((current_signal > current_macd and current_ema21 > current_ema9 and current_rsi > 52) or  # 1st condition
+                  (current_close >= current_bb_upper) or  # 2nd condition: Price touches or is above the upper BB
+                  (current_rsi >= 70)):  # 3rd condition: RSI(17) >= 70
                 allocation_dict[ticker] = 0  # Liquidate the stock
 
-        # Normalize allocations (though only equal or zero allocations will be present)
+        # Return the target allocation
         return TargetAllocation(allocation_dict)
