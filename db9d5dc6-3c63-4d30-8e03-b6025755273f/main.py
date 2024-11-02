@@ -6,8 +6,8 @@ from .macd import MACD  # Import the MACD function from the macd module
 class TradingStrategy(Strategy):
 
     def __init__(self):
-        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META"]
-        self.total_investment = 3000
+        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.total_investment = 2000
         self.data_list = []  # Placeholder for data classes
 
     @property
