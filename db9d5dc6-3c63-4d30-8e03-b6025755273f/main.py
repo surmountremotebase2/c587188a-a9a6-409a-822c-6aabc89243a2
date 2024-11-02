@@ -5,7 +5,7 @@ from .macd import MACD  # Import the MACD function from the macd module
 
 class TradingStrategy:
     def __init__(self):
-        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.tickers = ["AAPL", "MSFT", "NVDA"]#, "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
         self.total_investment = 2000
         self.investment_per_stock = self.total_investment / len(self.tickers)
         self.positions = {ticker: 0 for ticker in self.tickers}
