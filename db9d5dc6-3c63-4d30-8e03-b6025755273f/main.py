@@ -1,6 +1,6 @@
 import pandas as pd
 from .macd import MACD  # Import the MACD function from macd.py
-from surmount import technical_indicators
+from surmount import technical_indicators import RSI, EMA, BB
 from surmount.base_class import Strategy  # Ensure to import the Strategy base class
 
 class TradingStrategy(Strategy):
