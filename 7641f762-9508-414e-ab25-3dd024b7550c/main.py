@@ -1,14 +1,12 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import RSI, EMA, BB
+from surmount.technical_indicators import RSI, EMA, BB, ADX, ATR  # Import the necessary indicators
 from .macd import MACD  # Import the MACD function from the macd module
-from .atr import calculate_atr  # Import the ATR calculation function
-from .adx import calculate_adx  # Import the ADX calculation function
 
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "AAPL", "MSFT", "NVDA", "AMD", "META", "TSLA", "NFLX"
-            "AMZN", "GOOGL", "LMT", "NOC", "WMT", "JPM", 
+            "AAPL", "MSFT", "NVDA", "AMD", "META", "TSLA", "NFLX",
+            "AMZN", "GOOGL", "LMT", "NOC", "WMT", "JPM",
         ]  # Adjusted tickers as needed
 
     @property
@@ -26,12 +24,12 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 10)  # RSI with a period of 14
-            ema9 = EMA(ticker, ohlcv, 5)
-            ema21 = EMA(ticker, ohlcv, 13)
+            rsi_data = RSI(ticker, ohlcv, 14)  # RSI with a period of 14
+            ema9 = EMA(ticker, ohlcv, 9)
+            ema21 = EMA(ticker, ohlcv, 21)
             bb_data = BB(ticker, ohlcv, 20)
-            atr = calculate_atr(ohlcv, 14)  # Calculate ATR
-            adx = calculate_adx(ohlcv, 14)  # Calculate ADX
+            atr = ATR(ticker, ohlcv, 14)  # Calculate ATR from surmount
+            adx = ADX(ticker, ohlcv, 14)  # Calculate ADX from surmount
 
             if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['upper']) < 1 or len(adx) < 1:
                 continue
@@ -70,7 +68,7 @@ class TradingStrategy(Strategy):
                 allocation_dict[ticker] = 0  # Liquidate the stock
                 holding_dict[ticker] = 0  # Reset holding amount
 
-            # +DI and -DI crossing exit condition (assuming plus_di and minus_di are calculated)
+            # +DI and -DI crossing exit condition
             plus_di = 100 * (holding_dict[ticker] / atr[-1])  # Assuming you have these values; modify as needed
             minus_di = 100 * (holding_dict[ticker] / atr[-1])  # Assuming you have these values; modify as needed
             
