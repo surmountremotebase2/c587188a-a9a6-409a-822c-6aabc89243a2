@@ -47,7 +47,7 @@ class TradingStrategy(Strategy):
             current_signal = signal_line[-1]
 
             # Stop-loss condition: Liquidate if current price drops more than 5% from holding value
-            if holding_dict[ticker] > 0 and current_close < (holding_dict[ticker] * 0.95):
+            if holding_dict[ticker] > 0 and current_close < (holding_dict[ticker] * 0.97):
                 allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
                 holding_dict[ticker] = 0  # Reset holding amount
 
