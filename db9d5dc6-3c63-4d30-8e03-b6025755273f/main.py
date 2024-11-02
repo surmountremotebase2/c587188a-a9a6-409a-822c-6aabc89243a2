@@ -1,49 +1,66 @@
-from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import RSI, EMA, BB
-from .macd import MACD  # Import the MACD function from the macd module
-
+import pandas as pd
+from .macd import MACD  # Import the MACD function from macd.py
+from surmount import technical_indicators
 
 class TradingStrategy:
-    def __init__(self):
-        self.tickers = ["AAPL", "MSFT", "NVDA"]#, "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
-        self.total_investment = 2000
-        self.investment_per_stock = self.total_investment / len(self.tickers)
-        self.positions = {ticker: 0 for ticker in self.tickers}
+    def __init__(self, tickers):
+        self.tickers = tickers
+        self.total_investment = 2000  # Updated total investment amount
+        self.allocation = self.total_investment / len(tickers)  # Equal allocation
+        self.positions = {ticker: 0 for ticker in tickers}
 
-    def evaluate_conditions(self, data):
+    def get_ohlcv_data(self, ticker):
+        # Fetch OHLCV data for the ticker
+        # Placeholder for data retrieval function, replace with actual method
+        pass
+
+    def generate_signals(self, ticker, data):
+        close_prices = [item['close'] for item in data]
+        
+        # Calculate technical indicators
+        macd_line, signal_line = MACD(close_prices)
+        ema9 = technical_indicators.EMA(ticker, data, length=9)
+        ema21 = technical_indicators.EMA(ticker, data, length=21)
+        rsi = technical_indicators.RSI(ticker, data, length=14)  # RSI set to 14
+        bollinger_bands = technical_indicators.BB(ticker, data, length=20, std=2)
+        
+        # Extract current values
+        current_macd = macd_line[-1]
+        current_signal = signal_line[-1]
+        current_ema9 = ema9[-1]
+        current_ema21 = ema21[-1]
+        current_rsi = rsi[-1]
+        current_price = close_prices[-1]
+        lower_band = bollinger_bands['lower'][-1]
+        upper_band = bollinger_bands['upper'][-1]
+
+        # Entry conditions
+        if (
+            (current_macd > current_signal and current_ema9 > current_ema21 and current_rsi < 49) or
+            (current_price <= lower_band) or
+            (current_rsi < 30)
+        ):
+            return 'buy'
+
+        # Exit conditions
+        if (
+            (current_signal > current_macd and current_ema21 > current_ema9 and current_rsi > 52) or
+            (current_price >= upper_band) or
+            (current_rsi >= 70)
+        ):
+            return 'sell'
+
+        return 'hold'
+
+    def run(self, start_date, end_date):
         for ticker in self.tickers:
-            # Extract data for indicators
-            close_prices = data[ticker]['close']
-            ema9 = technical_indicators.EMA(ticker, data, 9)
-            ema21 = technical_indicators.EMA(ticker, data, 21)
-            macd_line, signal_line = MACD(close_prices)
-            rsi = technical_indicators.RSI(ticker, data, 14)
-            bollinger_bands = technical_indicators.BB(ticker, data, 20, 2)
-            lower_band = bollinger_bands['lower']
-            upper_band = bollinger_bands['upper']
-            
-            # Check Buy Conditions
-            buy_condition_1 = (macd_line[-1] > signal_line[-1] and ema9[-1] > ema21[-1] and rsi[-1] < 49)
-            buy_condition_2 = (close_prices[-1] <= lower_band[-1])
-            buy_condition_3 = (rsi[-1] < 30)
+            data = self.get_ohlcv_data(ticker)  # Fetch data for each ticker
+            signal = self.generate_signals(ticker, data)
 
-            if buy_condition_1 or buy_condition_2 or buy_condition_3:
-                self.buy_stock(ticker)
-
-            # Check Sell Conditions
-            sell_condition_1 = (signal_line[-1] > macd_line[-1] and ema21[-1] > ema9[-1] and rsi[-1] > 52)
-            sell_condition_2 = (close_prices[-1] >= upper_band[-1])
-            sell_condition_3 = (rsi[-1] >= 70)
-
-            if sell_condition_1 or sell_condition_2 or sell_condition_3:
-                self.sell_stock(ticker)
-
-    def buy_stock(self, ticker):
-        if self.positions[ticker] == 0:  # Only buy if not already holding the stock
-            self.positions[ticker] = self.investment_per_stock
-            print(f"Bought {ticker} with ${self.investment_per_stock}")
-
-    def sell_stock(self, ticker):
-        if self.positions[ticker] > 0:  # Only sell if holding the stock
-            print(f"Sold {ticker} with ${self.positions[ticker]}")
-            self.positions[ticker] = 0
+            if signal == 'buy' and self.positions[ticker] == 0:
+                self.positions[ticker] = self.allocation / data[-1]['close']
+                print(f"Bought {ticker} with {self.allocation} at {data[-1]['close']}")
+            elif signal == 'sell' and self.positions[ticker] > 0:
+                proceeds = self.positions[ticker] * data[-1]['close']
+                print(f"Sold {ticker} for {proceeds} at {data[-1]['close']}")
+                self.positions[ticker] = 0
