@@ -22,7 +22,7 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 17)  # Updated RSI to use a 17-day period
+            rsi_data = RSI(ticker, ohlcv, 14)  # Updated RSI to use a 17-day period
             ema9 = EMA(ticker, ohlcv, 9)
             ema21 = EMA(ticker, ohlcv, 21)
             bb_data = BB(ticker, ohlcv, 20)
