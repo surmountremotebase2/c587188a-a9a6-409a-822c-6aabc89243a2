@@ -7,8 +7,8 @@ from .calculate_adx import calculate_adx  # Import the ADX calculation function
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "AAPL", "MSFT", "WMT", "JPM", "NVDA", "AMD", "META", "TSLA",
-            "AMZN", "GOOGL", "LMT", "NOC", "BAC", "GS", "PFE", "JNJ", "FDX", "UNP"
+            "AAPL", "MSFT", "NVDA", "AMD", "META", "TSLA", "NFLX"
+            "AMZN", "GOOGL", "LMT", "NOC", "WMT", "JPM", 
         ]  # Adjusted tickers as needed
 
     @property
