@@ -1,16 +1,16 @@
 import pandas as pd
 from .macd import MACD  # Import the MACD function from macd.py
 from surmount import technical_indicators
+from surmount.base_class import Strategy  # Ensure to import the Strategy base class
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL"]#, "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.tickers = ["AAPL"]  # Uncomment other tickers when needed
         self.total_investment = 2000  # Updated total investment amount
-        self.allocation = self.total_investment / len(tickers)  # Equal allocation
-        self.positions = {ticker: 0 for ticker in tickers}
+        self.allocation = self.total_investment / len(self.tickers)  # Equal allocation
+        self.positions = {ticker: 0 for ticker in self.tickers}
 
     def get_ohlcv_data(self, ticker):
-        # Fetch OHLCV data for the ticker
         # Placeholder for data retrieval function, replace with actual method
         pass
 
