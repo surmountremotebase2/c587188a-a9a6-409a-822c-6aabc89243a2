@@ -1,33 +1,25 @@
 # macd.py
 import pandas as pd
 
-def MACD(close_prices, fast_period=12, slow_period=26, signal_period=9):
-    """
-    Calculate the MACD line and signal line.
+def calculate_adx(ohlcv, period=14):
+    # Calculate the +DI and -DI
+    high = ohlcv['high']
+    low = ohlcv['low']
+    close = ohlcv['close']
+    
+    # Calculate True Range and Directional Movement
+    true_range = high - low
+    high_move = high.diff()
+    low_move = low.diff()
+    
+    plus_dm = (high_move.where((high_move > low_move) & (high_move > 0), 0)).rolling(window=period).sum()
+    minus_dm = (low_move.where((low_move > high_move) & (low_move > 0), 0)).rolling(window=period).sum()
+    
+    # Average True Range
+    atr = calculate_atr(ohlcv, period)
+    
+    plus_di = 100 * (plus_dm / atr)
+    minus_di = 100 * (minus_dm / atr)
 
-    Parameters:
-    close_prices (List[float]): List of closing prices.
-    fast_period (int): The period for the fast EMA.
-    slow_period (int): The period for the slow EMA.
-    signal_period (int): The period for the signal line (EMA of the MACD line).
-
-    Returns:
-    Tuple[List[float], List[float]]: A tuple containing the MACD line and the signal line.
-    """
-    prices_df = pd.DataFrame(close_prices, columns=['close'])
-
-    # Calculate the fast and slow EMAs
-    prices_df['EMA_fast'] = prices_df['close'].ewm(span=fast_period, adjust=False).mean()
-    prices_df['EMA_slow'] = prices_df['close'].ewm(span=slow_period, adjust=False).mean()
-
-    # Calculate the MACD line
-    prices_df['MACD'] = prices_df['EMA_fast'] - prices_df['EMA_slow']
-
-    # Calculate the signal line (EMA of MACD line)
-    prices_df['Signal_Line'] = prices_df['MACD'].ewm(span=signal_period, adjust=False).mean()
-
-    # Extract MACD and Signal Line as lists
-    macd_line = prices_df['MACD'].tolist()
-    signal_line = prices_df['Signal_Line'].tolist()
-
-    return macd_line, signal_line
+    adx = (abs(plus_di - minus_di) / (plus_di + minus_di)).rolling(window=period).mean() * 100
+    return adx
