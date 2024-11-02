@@ -5,8 +5,7 @@ from .macd import MACD  # Import the MACD function from the macd module
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "AAPL", "MSFT", "WMT", "JPM", "NVDA", "AMD", "META", "TSLA",
-            "AMZN", "GOOGL", "LMT", "NOC", "BAC", "GS", "PFE", "JNJ", "FDX", "UNP"
+            "QQQ", "SPY", "VOO"
         ]  # Adjusted tickers as needed
 
     @property
@@ -51,9 +50,9 @@ class TradingStrategy(Strategy):
             # Investment Conditions
             if (current_close <= current_bb_lower or
                 current_ema9 > current_ema21 or
-                (current_ema9 > current_ema21 and current_rsi > 51) or
+                (current_ema9 > current_ema21 and current_rsi > 55) or
                 (current_rsi < 30) or
-                (current_macd > current_signal and current_rsi > 51)):
+                (current_macd > current_signal and current_rsi > 55)):
                 allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
                 holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
@@ -61,8 +60,8 @@ class TradingStrategy(Strategy):
             current_value = holding_dict[ticker] * current_close
             liquidate_value = allocation_dict[ticker] * 1.1  # The value to compare against
 
-            if (current_signal > current_macd and current_rsi < 49) or \
-               (current_ema21 > current_ema9 and current_rsi < 49) or \
+            if (current_signal > current_macd and current_rsi < 45) or \
+               (current_ema21 > current_ema9 and current_rsi < 45) or \
                (current_close >= current_bb_upper):
                 if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
                     allocation_dict[ticker] = 0  # Liquidate the stock
