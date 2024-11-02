@@ -10,7 +10,6 @@ class TradingStrategy(Strategy):
         ]  # Adjusted tickers as needed
         self.total_investment = 3000  # Total investment amount is $3,000
         self.investment_rate = 0.25  # Rate at which to invest (25%)
-        self.initial_allocation = self.total_investment * self.investment_rate / len(self.tickers)  # Equal allocation per ticker
 
     @property
     def interval(self):
@@ -57,8 +56,8 @@ class TradingStrategy(Strategy):
                 (current_ema9 > current_ema21 and current_rsi > 51) or
                 (current_rsi < 30) or
                 (current_macd > current_signal and current_rsi > 51)):
-                allocation_dict[ticker] += self.initial_allocation  # Invest 30% of initial investment
-                holding_dict[ticker] += self.initial_allocation / current_close  # Update holding amount
+                allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
+                holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
             # Liquidation Conditions
             current_value = holding_dict[ticker] * current_close
