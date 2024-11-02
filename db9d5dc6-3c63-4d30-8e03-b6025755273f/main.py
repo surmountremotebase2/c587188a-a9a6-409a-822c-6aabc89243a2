@@ -1,18 +1,16 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.logging import log
 from surmount.technical_indicators import RSI, EMA, BB
 from .macd import MACD  # Import the MACD function from the macd module
 
 class TradingStrategy(Strategy):
-
     def __init__(self):
-        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META"]
-        self.total_investment = 3000
-        self.data_list = []  # Placeholder for data classes
+        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.data_list = []
+        self.total_investment = 3000  # Total investment amount
 
     @property
     def interval(self):
-        return "1hour"  # Changed to 1 hour
+        return "1hour"
 
     @property
     def assets(self):
@@ -24,52 +22,45 @@ class TradingStrategy(Strategy):
 
     def run(self, data):
         allocation_dict = {ticker: self.total_investment / len(self.tickers) for ticker in self.tickers}
+        ohlcv = data.get("ohlcv")
 
         for ticker in self.tickers:
-            ohlcv = data["ohlcv"]
-            close_prices = [day[ticker]['close'] for day in ohlcv]  # Extract closing prices
-            macd_line, signal_line = MACD(close_prices)  # MACD Calculation using custom function
-            rsi_data = RSI(ticker, ohlcv, length=4)  # RSI Calculation
-            ema_short = EMA(ticker, ohlcv, length=9)  # 9-day EMA
-            ema_long = EMA(ticker, ohlcv, length=21)  # 21-day EMA
-            bb_data = BB(ticker, ohlcv, length=20)  # Bollinger Bands Calculation
+            close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
+            rsi_data = RSI(ticker, ohlcv, 4)
+            ema9 = EMA(ticker, ohlcv, 9)
+            ema21 = EMA(ticker, ohlcv, 21)
+            bb_data = BB(ticker, ohlcv, 20)
 
-            # MACD Signals
-            if len(macd_line) > 1:
-                if macd_line[-2] <= signal_line[-2] and macd_line[-1] > signal_line[-1]:
-                    log(f"{ticker}: Buy Signal (MACD)")
+            if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['lower']) < 1:
+                continue
 
-                if macd_line[-2] > signal_line[-2] and macd_line[-1] <= signal_line[-1]:
-                    log(f"{ticker}: Sell Signal (MACD)")
+            current_rsi = rsi_data[-1]
+            current_ema9 = ema9[-1]
+            current_ema21 = ema21[-1]
+            current_close = close_prices[-1]
+            current_bb_lower = bb_data['lower'][-1]
+            current_bb_upper = bb_data['upper'][-1]
 
-            # RSI Signals
-            if rsi_data:
-                current_rsi = rsi_data[-1]  # Adjust based on expected structure
-                rsi_prev = rsi_data[-2] if len(rsi_data) > 1 else None  # Ensure there's a previous RSI value
-                if current_rsi is not None:
-                    if current_rsi < 35 and (rsi_prev is None or rsi_prev < current_rsi):
-                        log(f"{ticker}: Buy Signal (RSI)")
+            macd_line, signal_line = MACD(close_prices)
+            current_macd = macd_line[-1]
+            current_signal = signal_line[-1]
 
-                    if current_rsi > 65 and (rsi_prev is None or rsi_prev > current_rsi):
-                        log(f"{ticker}: Sell Signal (RSI)")
+            # Entry Conditions to Buy
+            if (current_ema9 > current_ema21 and
+                current_rsi > 65 and
+                current_macd > current_signal and
+                current_close >= current_bb_lower):  # Adjust this line to check upward movement
+                allocation_dict[ticker] += allocation_dict[ticker] * 0.1  # Increase allocation for entry
 
-            # EMA Signals
-            if ema_short and ema_long and len(ema_short) > 1 and len(ema_long) > 1:
-                if ema_short[-1] > ema_long[-1] and ema_short[-2] <= ema_long[-2]:
-                    log(f"{ticker}: Buy Signal (EMA)")
+            # Liquidate Conditions
+            elif (current_ema9 < current_ema21 and
+                  current_rsi < 45 and
+                  current_macd < current_signal and
+                  current_close <= current_bb_upper):  # Adjust this line to check downward movement
+                allocation_dict[ticker] -= allocation_dict[ticker] * 0.1  # Decrease allocation for liquidation
 
-                if ema_short[-1] < ema_long[-1] and ema_short[-2] >= ema_long[-2]:
-                    log(f"{ticker}: Sell Signal (EMA)")
+        # Normalize allocations
+        total_allocation = sum(allocation_dict.values())
+        normalized_allocation = {ticker: allocation / total_allocation for ticker, allocation in allocation_dict.items()}
 
-            # Bollinger Bands Signals
-            if bb_data and len(bb_data) > 0:
-                current_price = ohlcv[-1][ticker]['close']
-                lower_band = bb_data['lower'][-1]  # Accessing the lower band
-                upper_band = bb_data['upper'][-1]  # Accessing the upper band
-                if current_price <= lower_band:
-                    log(f"{ticker}: Buy Signal (Bollinger Bands)")
-
-                if current_price >= upper_band:
-                    log(f"{ticker}: Sell Signal (Bollinger Bands)")
-
-        return TargetAllocation(allocation_dict)
+        return TargetAllocation(normalized_allocation)
