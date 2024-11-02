@@ -54,9 +54,9 @@ class TradingStrategy(Strategy):
             # Investment Conditions
             if (current_close <= current_bb_lower or
                 current_ema9 > current_ema21 or
-                (current_ema9 > current_ema21 and current_rsi > 40) or
+                (current_ema9 > current_ema21 and current_rsi > 50) or
                 (current_rsi < 30) or
-                (current_macd > current_signal and current_rsi > 40)):
+                (current_macd > current_signal and current_rsi > 50)):
                 allocation_dict[ticker] += self.initial_allocation  # Invest 30% of initial investment
                 holding_dict[ticker] += self.initial_allocation / current_close  # Update holding amount
 
