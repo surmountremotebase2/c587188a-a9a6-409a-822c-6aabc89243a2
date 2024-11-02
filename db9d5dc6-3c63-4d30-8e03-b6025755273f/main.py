@@ -54,7 +54,7 @@ class TradingStrategy(Strategy):
                 holding_dict[ticker] = 0  # Reset holding amount
 
             # Investment Conditions
-            if (current_close <= current_bb_lower or
+            if (current_close <= current_bb_lower or \
                 (current_ema9 > current_ema21 and current_adx > 20)
                 (current_ema9 > current_ema21 and current_rsi > 52 and current_adx > 20) or
                 (current_rsi < 30 and current_adx > 20) or
