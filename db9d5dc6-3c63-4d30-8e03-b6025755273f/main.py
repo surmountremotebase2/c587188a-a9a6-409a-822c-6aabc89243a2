@@ -1,3 +1,8 @@
+from surmount.base_class import Strategy, TargetAllocation
+from surmount.technical_indicators import RSI, EMA, BB
+from .macd import MACD  # Import the MACD function from the macd module
+
+
 class TradingStrategy:
     def __init__(self):
         self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
