@@ -2,9 +2,22 @@ from surmount.base_class import Strategy, TargetAllocation
 from surmount.logging import log
 from surmount.technical_indicators import EMA, MACD, RSI, BB, SO, ATR, PSAR, OBV
 
-class TradingStrategy:
-    def __init__(self, tickers):
-        self.tickers = tickers
+class TradingStrategy(Strategy):
+    def __init__(self):
+        # Define the tickers we will be trading
+        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        # Initial allocation of $3000 across the assets, can be adjusted based on strategy requirements
+        self.initial_investment = 3000
+
+    @property
+    def assets(self):
+        # Return the list of tickers this strategy will handle
+        return self.tickers
+
+    @property
+    def interval(self):
+        # Set the interval to 1-hour for both EMA and RSI calculations
+        return "1hour"
 
     def run(self, data):
         allocation_dict = {ticker: 0 for ticker in self.tickers}
@@ -48,7 +61,7 @@ class TradingStrategy:
                     ]
 
                     if sum(buy_conditions) >= 5:
-                        allocation_dict[ticker] = 1 / len(self.tickers)
+                        allocation_dict[ticker] = self.initial_investment / len(self.tickers)
 
                     sell_conditions = [
                         ema_9 < ema_21,
