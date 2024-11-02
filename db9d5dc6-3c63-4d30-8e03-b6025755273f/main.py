@@ -1,66 +1,64 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import RSI, EMA, MACD, BB
 from surmount.logging import log
+from surmount.technical_indicators import EMA, MACD, RSI, BB, SO, ATR, PSAR, OBV
 
 class TradingStrategy(Strategy):
+
     def __init__(self):
         self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META"]
-        # Each stock gets an equal part of the $3000, meaning each gets $500.
-        # However, for allocation, we work with proportion (0 to 1), not direct dollar amounts.
-        self.equal_allocation = 1 / len(self.tickers)  
+        self.data_list = []
+
+    @property
+    def interval(self):
+        return "1day"
 
     @property
     def assets(self):
         return self.tickers
 
     @property
-    def interval(self):
-        return "1day"  # Choose appropriate interval based on strategy needs
+    def data(self):
+        return self.data_list
 
     def run(self, data):
-        allocation = {}
-        for ticker in self.assets:
-            # Extracting indicators
-            macd_signal = MACD(ticker, data, 12, 26)['signal'][-1]
-            macd_line = MACD(ticker, data, 12, 26)['MACD'][-1]
-            rsi = RSI(ticker, data, 14)[-1]
-            ema_short = EMA(ticker, data, 9)[-1]
-            ema_long = EMA(ticker, data, 21)[-1]
-            bb = BB(ticker, data, 20, 2)
-            
-            # Defining buy and sell signals
-            buy_signals = 0
-            sell_signals = 0
-            
-            # MACD buy/sell signal
-            if macd_line > macd_signal:
-                buy_signals += 1
-            else:
-                sell_signals += 1
+        allocation_dict = {ticker: 0 for ticker in self.tickers}
+        ohlcv = data.get("ohlcv")
+        
+        for ticker in self.tickers:
+            ema_9 = EMA(ticker, ohlcv, 9)[-1]
+            ema_21 = EMA(ticker, ohlcv, 21)[-1]
+            macd = MACD(ticker, ohlcv, fast=12, slow=26)
+            rsi = RSI(ticker, ohlcv, length=14)[-1]
+            bb = BB(ticker, ohlcv, length=20)
+            stochastic = SO(ticker, ohlcv)
+            atr = ATR(ticker, ohlcv, length=14)[-1]
+            obv = OBV(ticker, ohlcv)
 
-            # RSI buy/sell signal
-            if rsi < 30:
-                buy_signals += 1
-            elif rsi > 70:
-                sell_signals += 1
+            buy_conditions = [
+                ema_9 > ema_21,                        # EMA condition
+                macd['macd'] > macd['signal'],        # MACD condition
+                rsi < 30,                              # RSI condition
+                ohlcv[-1][ticker]['close'] < bb['lower'][-1],  # Bollinger Bands condition
+                stochastic['%K'][-1] > stochastic['%D'][-1],    # Stochastic condition
+                obv > obv[-2]                          # OBV condition
+            ]
 
-            # EMA crossover buy/sell signal
-            if ema_short > ema_long:
-                buy_signals += 1
-            elif ema_short < ema_long:
-                sell_signals += 1
-            
-            # Bollinger Bands stop-loss logic (simplified)
-            if data[-1][ticker]['close'] < bb['lower'][-1]:  # Assuming entry price is close to current price
-                log(f"{ticker}: Stop-loss triggered.")
-                sell_signals += 1
+            # Entry Conditions for a Buy Position
+            if sum(buy_conditions) >= 5:  # Check if at least 5 out of 6 conditions are met
+                allocation_dict[ticker] = 1 / len(self.tickers)  # Equal allocation for all assets
 
-            # Decision making based on buy and sell signals
-            if buy_signals >= 3 and sell_signals < 2:
-                # Allocate equally if 3 indicators show upward trend and stop-loss not hit
-                allocation[ticker] = self.equal_allocation
-            else:
-                # No allocation if conditions are not met
-                allocation[ticker] = 0
+            # Exit Conditions for Liquidating Positions
+            sell_conditions = [
+                ema_9 < ema_21,                         # EMA condition
+                macd['macd'] < macd['signal'],         # MACD condition
+                rsi > 70,                               # RSI condition
+                ohlcv[-1][ticker]['close'] > bb['upper'][-1],  # Bollinger Bands condition
+                stochastic['%K'][-1] < stochastic['%D'][-1],     # Stochastic condition
+                ohlcv[-1][ticker]['close'] < PSAR(ticker, ohlcv)[-1],  # Parabolic SAR condition
+                atr > 0                                 # ATR condition for volatility check
+            ]
 
-        return TargetAllocation(allocation)
+            if sum(sell_conditions) >= 7:  # Check if at least 7 out of 8 conditions are met
+                allocation_dict[ticker] = 0  # Liquidate the position
+
+        return TargetAllocation(allocation_dict)
