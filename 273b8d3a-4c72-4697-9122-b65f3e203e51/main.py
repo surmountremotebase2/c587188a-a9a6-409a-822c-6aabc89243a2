@@ -1,3 +1,4 @@
+# Import necessary libraries
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import EMA
 
@@ -20,15 +21,18 @@ class TradingStrategy(Strategy):
 
     def run(self, data):
         # Access OHLCV data for TSLA
-        ohlcv_data = data["ohlcv"].get(self.ticker, [])
+        ohlcv_data = [entry for entry in data["ohlcv"] if entry['ticker'] == self.ticker]
         
         # Ensure we have enough data points for EMA
         if len(ohlcv_data) < 21:
             return TargetAllocation(self.allocation_dict)  # Not enough data to compute EMA
 
+        # Convert OHLCV data into a format suitable for EMA calculation
+        close_prices = [entry['close'] for entry in ohlcv_data]  # Assuming 'close' is part of the ohlcv structure
+
         # Calculate EMA9 and EMA21
-        ema9 = EMA(self.ticker, ohlcv_data, period=9)
-        ema21 = EMA(self.ticker, ohlcv_data, period=21)
+        ema9 = EMA(self.ticker, close_prices, period=9)
+        ema21 = EMA(self.ticker, close_prices, period=21)
 
         # Check for crossover signals
         if ema9[-1] > ema21[-1] and ema9[-2] <= ema21[-2]:
