@@ -48,7 +48,7 @@ class TradingStrategy(Strategy):
 
             # Liquidation Conditions
             elif ((current_close >= current_bb_upper or current_macd < current_signal) and  # Price touches BB upper or MACD condition
-                  (current_ema9 < current_ema21 or current_rsi < 45))):  # All conditions met for liquidation
+                  (current_ema9 < current_ema21 or current_rsi < 45)):  # All conditions met for liquidation
                 allocation_dict[ticker] = 0  # Liquidate the stock
 
         # Normalize allocations (though only equal or zero allocations will be present)
