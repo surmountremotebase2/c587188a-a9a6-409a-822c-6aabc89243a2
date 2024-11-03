@@ -4,7 +4,7 @@ from surmount.technical_indicators import RSI
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META"]
+        self.tickers = ["TSLA", "AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX"]
         self.initial_investment = 3000
 
     @property
