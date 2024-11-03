@@ -6,7 +6,7 @@ class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
             "META", "AAPL", "AMZN", "NFLX", "GOOGL", 
-            "NVDA", "AMD", "TSLA", "PLTR", "WMT"
+            #"NVDA", "AMD", "TSLA", "PLTR", "WMT"
         ]  # Adjusted tickers as needed
 
     @property
