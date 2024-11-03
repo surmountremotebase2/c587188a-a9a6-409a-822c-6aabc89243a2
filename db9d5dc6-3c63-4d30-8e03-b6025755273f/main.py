@@ -54,10 +54,10 @@ class TradingStrategy(Strategy):
             if holding_dict[ticker] == 0 and (
                 (current_close <= current_bb_lower or
                  current_ema9 > current_ema21 or
-                 (current_ema9 > current_ema21 and current_rsi > 60) or  # Increased to 60 for stronger bullish confirmation
-                 current_rsi < 25 or  # Decreased to 25 for deeper oversold condition
-                 (current_macd > current_signal and current_rsi > 60))
-                and current_adx > 25  # Increased to 25 for only strong trends
+                 (current_ema9 > current_ema21 and current_rsi > 50) or  # Increased to 60 for stronger bullish confirmation
+                 current_rsi < 30 or  # Decreased to 25 for deeper oversold condition
+                 (current_macd > current_signal and current_rsi > 50))
+                and current_adx > 20  # Increased to 25 for only strong trends
             ):
                 allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
                 holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
@@ -66,7 +66,7 @@ class TradingStrategy(Strategy):
             current_value = holding_dict[ticker] * current_close
             liquidate_value = allocation_dict[ticker] * 1.05  # Reduced to 1.05 for quicker profit-taking
 
-            if current_adx > 25 and (  # Increased to 25 for conservative exits
+            if current_adx > 20 and (  # Increased to 25 for conservative exits
                 (current_signal > current_macd and current_rsi < 50) or  # Raised to 50 for quicker exits
                 (current_ema21 > current_ema9 and current_rsi < 50) or  # Raised to 50 for quicker exits
                 current_rsi > 70 or
