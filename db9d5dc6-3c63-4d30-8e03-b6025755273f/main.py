@@ -59,7 +59,7 @@ class TradingStrategy(Strategy):
                  (current_macd > current_signal and current_rsi > 55))  # Strengthened MACD condition
                 and current_adx > 20  # Maintain a trend presence
             ):
-                allocation_dict[ticker] = 0.3 / len(self.tickers) # Invest equal proportion per ticker
+                allocation_dict[ticker] = 1 / len(self.tickers) # Invest equal proportion per ticker
                 holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
             # Liquidation Conditions
