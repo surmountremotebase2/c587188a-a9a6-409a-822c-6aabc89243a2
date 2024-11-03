@@ -23,7 +23,7 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 14)   # RSI with a period of 14
+            rsi_data = RSI(ticker, ohlcv, 12)   # RSI with a period of 14
             ema9 = EMA(ticker, ohlcv, 9)        # EMA with a period of 9
             ema21 = EMA(ticker, ohlcv, 21)      # EMA with a period of 21
             bb_data = BB(ticker, ohlcv, 20, 2)  # Bollinger Bands length 20 std 2
@@ -54,10 +54,10 @@ class TradingStrategy(Strategy):
             if holding_dict[ticker] == 0 and (
                 (current_close <= current_bb_lower or
                  current_ema9 > current_ema21 or
-                 (current_ema9 > current_ema21 and current_rsi > 52) or
-                 current_rsi < 35 or
-                 (current_macd > current_signal and current_rsi > 52))
-                and current_adx > 20
+                 (current_ema9 > current_ema21 and current_rsi > 50) or
+                 current_rsi < 31 or
+                 (current_macd > current_signal and current_rsi > 50))
+                and current_adx > 19
             ):
                 allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
                 holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
@@ -66,10 +66,10 @@ class TradingStrategy(Strategy):
             current_value = holding_dict[ticker] * current_close
             liquidate_value = allocation_dict[ticker] * 1.15  # The value to compare against
 
-            if current_adx > 20 and (
-                (current_signal > current_macd and current_rsi < 48) or
-                (current_ema21 > current_ema9 and current_rsi < 48) or
-                current_rsi > 70 or
+            if current_adx > 19 and (
+                (current_signal > current_macd and current_rsi < 35) or
+                (current_ema21 > current_ema9 and current_rsi < 35) or
+                current_rsi > 69 or
                 current_close >= current_bb_upper
             ):
                 if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
