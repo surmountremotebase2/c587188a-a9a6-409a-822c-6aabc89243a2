@@ -51,22 +51,24 @@ class TradingStrategy(Strategy):
                 holding_dict[ticker] = 0  # Reset holding amount
 
             # Investment Conditions
-            if (current_close <= current_bb_lower or
-                current_ema9 > current_ema21 or
-                (current_ema9 > current_ema21 and current_rsi > 52) or
-                (current_rsi < 35) or
-                (current_macd > current_signal and current_rsi > 52)):
-                allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
-                holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
+            if holding_dict[ticker] == 0 and (
+               (current_close <= current_bb_lower or
+               current_ema9 > current_ema21 or
+               (current_ema9 > current_ema21 and current_rsi > 52) or
+               (current_rsi < 35) or
+               (current_macd > current_signal and current_rsi > 52)):
+               allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
+               holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
             # Liquidation Conditions
             current_value = holding_dict[ticker] * current_close
             liquidate_value = allocation_dict[ticker] * 1.15  # The value to compare against
 
-            if (current_signal > current_macd and current_rsi < 48) or \
+            if current_adx > 20 and (
+               (current_signal > current_macd and current_rsi < 48) or \
                (current_ema21 > current_ema9 and current_rsi < 48) or \
                (current_rsi > 70) or \
-               (current_close >= current_bb_upper):
+               (current_close >= current_bb_upper)):
                 if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
                     allocation_dict[ticker] = 0  # Liquidate the stock
                     holding_dict[ticker] = 0  # Reset holding amount
