@@ -51,7 +51,7 @@ class TradingStrategy(Strategy):
                 holding_dict[ticker] = 0  # Reset holding amount
 
             # Investment Conditions (removed holding_dict[ticker] == 0 condition)
-            if (current_rsi < 30 or current_rsi > 55) and current_adx > 20:
+            if (current_rsi < 30 or current_rsi > 50) and current_adx > 20:
                 if (current_close <= current_bb_lower or
                     current_ema9 > current_ema21 or
                     (current_ema9 > current_ema21 and current_rsi > 55) or  # More aggressive bullish confirmation
@@ -66,8 +66,8 @@ class TradingStrategy(Strategy):
             liquidate_value = allocation_dict[ticker] * 1.03  # Adjusted for quicker profit-taking
 
             if current_adx > 20 and current_rsi < 50:
-                if (current_signal > current_macd and current_rsi < 50 or  # Maintain a conservative RSI threshold
-                    current_ema21 > current_ema9 and current_rsi < 50 or
+                if (current_signal > current_macd and current_rsi < 45 or  # Maintain a conservative RSI threshold
+                    current_ema21 > current_ema9 and current_rsi < 45 or
                     current_rsi > 70 or
                     current_close >= current_bb_upper):
                     if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
