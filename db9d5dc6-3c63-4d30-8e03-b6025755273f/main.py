@@ -5,7 +5,7 @@ from .macd import MACD  # Import the MACD function from the macd module
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "META", "AAPL", "AMZN", "NFLX", "GOOGL", "NVDA", "AMD", "MSFT", "TSLA"
+            "META", "AAPL", "AMZN", "NFLX", "GOOGL", "NVDA", "AMD", "TSLA"
         ]  # Adjusted tickers as needed
 
     @property
@@ -50,25 +50,25 @@ class TradingStrategy(Strategy):
                 allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
                 holding_dict[ticker] = 0  # Reset holding amount
 
-            # Investment Conditions
-            if holding_dict[ticker] == 0 and (
+            # Investment Conditions (removed holding_dict[ticker] == 0 condition)
+            if (
                 (current_close <= current_bb_lower or
                  current_ema9 > current_ema21 or
-                 (current_ema9 > current_ema21 and current_rsi > 50) or  # Increased to 60 for stronger bullish confirmation
-                 current_rsi < 30 or  # Decreased to 25 for deeper oversold condition
-                 (current_macd > current_signal and current_rsi > 50))
-                and current_adx > 20  # Increased to 25 for only strong trends
+                 (current_ema9 > current_ema21 and current_rsi > 55) or  # More aggressive bullish confirmation
+                 current_rsi < 30 or  # Lowered to allow for deeper oversold buying
+                 (current_macd > current_signal and current_rsi > 55))  # Strengthened MACD condition
+                and current_adx > 20  # Maintain a trend presence
             ):
                 allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
                 holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
             # Liquidation Conditions
             current_value = holding_dict[ticker] * current_close
-            liquidate_value = allocation_dict[ticker] * 1.05  # Reduced to 1.05 for quicker profit-taking
+            liquidate_value = allocation_dict[ticker] * 1.03  # Adjusted for quicker profit-taking
 
-            if current_adx > 20 and (  # Increased to 25 for conservative exits
-                (current_signal > current_macd and current_rsi < 50) or  # Raised to 50 for quicker exits
-                (current_ema21 > current_ema9 and current_rsi < 50) or  # Raised to 50 for quicker exits
+            if current_adx > 20 and (
+                (current_signal > current_macd and current_rsi < 50) or  # Maintain a conservative RSI threshold
+                (current_ema21 > current_ema9 and current_rsi < 50) or
                 current_rsi > 70 or
                 current_close >= current_bb_upper
             ):
