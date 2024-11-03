@@ -50,8 +50,8 @@ class TradingStrategy(Strategy):
                 allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
                 holding_dict[ticker] = 0  # Reset holding amount
 
-            # Investment Conditions
-            if holding_dict[ticker] == 0 and (  # Added back the condition to check if not holding the stock
+            # Investment Conditions (removed holding_dict[ticker] == 0 condition)
+            if (
                 (current_close <= current_bb_lower or
                  current_ema9 > current_ema21 or
                  (current_ema9 > current_ema21 and current_rsi > 55) or  # More aggressive bullish confirmation
@@ -59,7 +59,7 @@ class TradingStrategy(Strategy):
                  (current_macd > current_signal and current_rsi > 55))  # Strengthened MACD condition
                 and current_adx > 20  # Maintain a trend presence
             ):
-                allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
+                allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
                 holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
             # Liquidation Conditions
