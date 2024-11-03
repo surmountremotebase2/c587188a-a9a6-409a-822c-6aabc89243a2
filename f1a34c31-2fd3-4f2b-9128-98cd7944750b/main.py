@@ -5,7 +5,7 @@ from .macd import MACD  # Import the MACD function from the macd module
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "QQQ", "SPY"#, "IWM", "QQQ"
+            "QQQ", "SPY", "IWM"
         ]  # Adjusted tickers as needed
 
     @property
