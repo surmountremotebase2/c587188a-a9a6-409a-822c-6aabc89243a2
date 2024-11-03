@@ -23,11 +23,11 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 12)   # RSI with a period of 14
-            ema9 = EMA(ticker, ohlcv, 9)        # EMA with a period of 9
-            ema21 = EMA(ticker, ohlcv, 21)      # EMA with a period of 21
+            rsi_data = RSI(ticker, ohlcv, 14)  # RSI with a period of 14
+            ema9 = EMA(ticker, ohlcv, 9)       # EMA with a period of 9
+            ema21 = EMA(ticker, ohlcv, 21)     # EMA with a period of 21
             bb_data = BB(ticker, ohlcv, 20, 2)  # Bollinger Bands length 20 std 2
-            adx = ADX(ticker, ohlcv, 14)        # Calculate ADX from surmount
+            adx = ADX(ticker, ohlcv, 14)       # Calculate ADX from surmount
 
             if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['upper']) < 1:
                 continue
@@ -45,8 +45,8 @@ class TradingStrategy(Strategy):
             current_macd = macd_line[-1]
             current_signal = signal_line[-1]
 
-            # Stop-loss condition: Liquidate if current price drops more than 5% from holding value
-            if holding_dict[ticker] > 0 and current_close < (holding_dict[ticker] * 0.95):
+            # Stop-loss condition: Liquidate if current price drops more than 3% from holding value
+            if holding_dict[ticker] > 0 and current_close < (holding_dict[ticker] * 0.97):
                 allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
                 holding_dict[ticker] = 0  # Reset holding amount
 
@@ -54,22 +54,22 @@ class TradingStrategy(Strategy):
             if holding_dict[ticker] == 0 and (
                 (current_close <= current_bb_lower or
                  current_ema9 > current_ema21 or
-                 (current_ema9 > current_ema21 and current_rsi > 50) or
-                 current_rsi < 31 or
-                 (current_macd > current_signal and current_rsi > 50))
-                and current_adx > 19
+                 (current_ema9 > current_ema21 and current_rsi > 60) or  # Increased to 60 for stronger bullish confirmation
+                 current_rsi < 25 or  # Decreased to 25 for deeper oversold condition
+                 (current_macd > current_signal and current_rsi > 60))
+                and current_adx > 25  # Increased to 25 for only strong trends
             ):
                 allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
                 holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
             # Liquidation Conditions
             current_value = holding_dict[ticker] * current_close
-            liquidate_value = allocation_dict[ticker] * 1.15  # The value to compare against
+            liquidate_value = allocation_dict[ticker] * 1.05  # Reduced to 1.05 for quicker profit-taking
 
-            if current_adx > 19 and (
-                (current_signal > current_macd and current_rsi < 35) or
-                (current_ema21 > current_ema9 and current_rsi < 35) or
-                current_rsi > 69 or
+            if current_adx > 25 and (  # Increased to 25 for conservative exits
+                (current_signal > current_macd and current_rsi < 50) or  # Raised to 50 for quicker exits
+                (current_ema21 > current_ema9 and current_rsi < 50) or  # Raised to 50 for quicker exits
+                current_rsi > 70 or
                 current_close >= current_bb_upper
             ):
                 if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
