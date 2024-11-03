@@ -56,7 +56,8 @@ class TradingStrategy(Strategy):
                current_ema9 > current_ema21 or
                (current_ema9 > current_ema21 and current_rsi > 52) or
                (current_rsi < 35) or
-               (current_macd > current_signal and current_rsi > 52)):
+               (current_macd > current_signal and current_rsi > 52) and 
+               current_adx > 20):
                allocation_dict[ticker] = 1.0 / len(self.tickers)  # Invest equal proportion per ticker
                holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
 
