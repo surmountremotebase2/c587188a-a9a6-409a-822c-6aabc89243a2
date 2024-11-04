@@ -58,10 +58,20 @@ class TradingStrategy(Strategy):
             # Stop-loss condition: Liquidate if the price drops 3% within 1 hour, 4 hours, or 1 day
             # (This part requires your data structure to support time-based checks, not shown in this snippet)
 
-            # Liquidation Conditions (remaining conditions unchanged)
+            # Liquidation Conditions
             current_value = holding_dict[ticker] * current_close
             liquidate_value = allocation_dict[ticker] * 1.03  # Adjusted for quicker profit-taking
 
             if current_adx > 20 and current_rsi < 50:
-                if (current_signal > current_macd and current_rsi < 45 or  # Conservative RSI threshold
-                    current_ema21 > current_ema9 and current_rsi < 45 or
+                if (
+                    (current_signal > current_macd and current_rsi < 45) or  # Conservative RSI threshold
+                    (current_ema21 > current_ema9 and current_rsi < 45) or
+                    current_rsi > 70 or
+                    current_close >= bb_data['upper'][-1]
+                ):
+                    if current_value > liquidate_value:  # Only liquidate if current value is greater than the allocation
+                        allocation_dict[ticker] = 0  # Liquidate the stock
+                        holding_dict[ticker] = 0  # Reset holding amount
+
+        # Return the target allocation
+        return TargetAllocation(allocation_dict)
