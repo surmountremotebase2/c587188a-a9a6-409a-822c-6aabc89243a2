@@ -2,7 +2,7 @@ from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import ADX
 from .macd import MACD  # Import the MACD function from the macd module
 
-class MACD_ADX_Strategy(Strategy):
+class TradingStrategy(Strategy):  # Changed back to TradingStrategy
     def __init__(self):
         self.tickers = ["AAPL", "GOOGL", "AMZN"]  # Add your desired tickers here
         self.previous_signals = {ticker: None for ticker in self.tickers}  # Store previous signal states
