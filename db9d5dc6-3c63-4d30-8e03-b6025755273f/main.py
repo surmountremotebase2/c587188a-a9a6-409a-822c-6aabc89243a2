@@ -5,7 +5,7 @@ from .macd import MACD  # Import the MACD function from the macd module
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "AAPL", "GOOGL", "AMZN"  # Adjusted tickers as needed
+            "AAPL", "GOOGL"  # Adjusted tickers as needed
         ]
         self.previous_signals = {ticker: None for ticker in self.tickers}  # Store previous signal states
         self.bearish_timestamps = {ticker: None for ticker in self.tickers}  # Track bearish entry timestamps
