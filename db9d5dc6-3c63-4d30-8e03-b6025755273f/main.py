@@ -11,7 +11,7 @@ class TradingStrategy(Strategy):
 
     @property
     def interval(self):
-        return "1hour"  # Set interval to 5 minutes
+        return "4hour"  # Set interval to 1 hour
 
     @property
     def assets(self):
@@ -67,11 +67,6 @@ class TradingStrategy(Strategy):
                 (current_ema9 > current_ema21 and current_rsi > 60) or  # More conservative bullish confirmation
                 (current_macd > current_signal and current_rsi > 60)  # Strengthened MACD condition
             )
-
-            # Delayed entry logic: check the previous signal
-            if current_signal_valid and self.previous_signals[ticker] is True:
-                allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
-                holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
             else:
                 self.previous_signals[ticker] = current_signal_valid  # Store the current signal state for the next interval
 
