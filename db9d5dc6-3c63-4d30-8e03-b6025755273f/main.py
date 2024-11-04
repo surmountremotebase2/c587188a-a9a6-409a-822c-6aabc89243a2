@@ -8,11 +8,11 @@ class TradingStrategy(Strategy):
             "AAPL", "GOOGL", "AMZN"  # Adjusted tickers as needed
         ]
         self.previous_signals = {ticker: None for ticker in self.tickers}  # Store previous signal states
-        self.signal_timestamps = {ticker: None for ticker in self.tickers}  # Store timestamps for entry signals
+        self.bearish_timestamps = {ticker: None for ticker in self.tickers}  # Track bearish entry timestamps
 
     @property
     def interval(self):
-        return "4hour"  # Set interval to 4 hours
+        return "4hour"
 
     @property
     def assets(self):
@@ -22,15 +22,14 @@ class TradingStrategy(Strategy):
         allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocations to zero
         holding_dict = {ticker: 0 for ticker in self.tickers}  # Track holding amounts
         ohlcv = data.get("ohlcv")
-        current_timestamp = data.get("timestamp")
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 15)
+            rsi_data = RSI(ticker, ohlcv, 14)
             ema9 = EMA(ticker, ohlcv, 9)
             ema21 = EMA(ticker, ohlcv, 21)
             bb_data = BB(ticker, ohlcv, 20, 2)
-            adx = ADX(ticker, ohlcv, 15)
+            adx = ADX(ticker, ohlcv, 14)
 
             if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['upper']) < 1:
                 continue
@@ -62,8 +61,26 @@ class TradingStrategy(Strategy):
                 allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
                 holding_dict[ticker] = 0  # Reset holding amount
                 self.previous_signals[ticker] = None  # Reset previous signal on liquidation
-                self.signal_timestamps[ticker] = None  # Reset timestamp
 
-            # Current signal evaluation with more conservative thresholds
-            current_signal_valid = (
-                (current
+            # Current signal evaluation with more conservative bullish and aggressive bearish thresholds
+            bullish_signal_valid = (current_rsi > 52 and current_adx > 25) and (
+                current_ema9 > current_ema21 or
+                (current_macd > current_signal and current_rsi > 60)
+            )
+            
+            bearish_signal_valid = (current_rsi < 40 and current_adx > 25) or (
+                current_signal > current_macd or
+                current_ema21 > current_ema9
+            )
+
+            if bullish_signal_valid and self.previous_signals[ticker] != "bullish":
+                allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
+                holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
+                self.previous_signals[ticker] = "bullish"
+            elif bearish_signal_valid and holding_dict[ticker] > 0:
+                allocation_dict[ticker] = 0  # Liquidate stock for bearish signal
+                holding_dict[ticker] = 0  # Reset holding amount
+                self.previous_signals[ticker] = "bearish"
+
+        # Return the target allocation
+        return TargetAllocation(allocation_dict)
