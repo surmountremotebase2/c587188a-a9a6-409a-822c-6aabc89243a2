@@ -4,7 +4,9 @@ from .macd import MACD  # Import the MACD function from the macd module
 
 class TradingStrategy(Strategy):  # Changed back to TradingStrategy
     def __init__(self):
-        self.tickers = ["AAPL", "GOOGL", "AMZN"]  # Add your desired tickers here
+        self.tickers = [
+            "AAPL", "GOOGL", "AMZN"
+            ]  # Add your desired tickers here
         self.previous_signals = {ticker: None for ticker in self.tickers}  # Store previous signal states
 
     @property
