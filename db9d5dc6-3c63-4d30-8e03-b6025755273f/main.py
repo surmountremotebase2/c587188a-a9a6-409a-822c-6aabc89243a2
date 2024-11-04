@@ -8,10 +8,11 @@ class TradingStrategy(Strategy):
             "AAPL", "GOOGL", "AMZN"  # Adjusted tickers as needed
         ]
         self.previous_signals = {ticker: None for ticker in self.tickers}  # Store previous signal states
+        self.signal_timestamps = {ticker: None for ticker in self.tickers}  # Store timestamps for entry signals
 
     @property
     def interval(self):
-        return "4hour"  # Set interval to 1 hour
+        return "4hour"  # Set interval to 4 hours
 
     @property
     def assets(self):
@@ -21,11 +22,12 @@ class TradingStrategy(Strategy):
         allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocations to zero
         holding_dict = {ticker: 0 for ticker in self.tickers}  # Track holding amounts
         ohlcv = data.get("ohlcv")
+        current_timestamp = data.get("timestamp")
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
             rsi_data = RSI(ticker, ohlcv, 15)
-            ema9 = EMA(ticker, ohlcv, 10)
+            ema9 = EMA(ticker, ohlcv, 9)
             ema21 = EMA(ticker, ohlcv, 21)
             bb_data = BB(ticker, ohlcv, 20, 2)
             adx = ADX(ticker, ohlcv, 15)
@@ -60,31 +62,8 @@ class TradingStrategy(Strategy):
                 allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
                 holding_dict[ticker] = 0  # Reset holding amount
                 self.previous_signals[ticker] = None  # Reset previous signal on liquidation
+                self.signal_timestamps[ticker] = None  # Reset timestamp
 
             # Current signal evaluation with more conservative thresholds
-            current_signal_valid = (current_rsi < 28 or current_rsi > 52) and current_adx > 25 and (
-                current_close <= current_bb_lower or
-                (current_ema9 > current_ema21 and current_rsi > 60) or  # More conservative bullish confirmation
-                (current_macd > current_signal and current_rsi > 60)  # Strengthened MACD condition
-            )
-            else:
-                self.previous_signals[ticker] = current_signal_valid  # Store the current signal state for the next interval
-
-            # Liquidation Conditions with a conservative profit-taking strategy
-            current_value = holding_dict[ticker] * current_close
-            liquidate_value = allocation_dict[ticker] * 1.06  # More conservative profit-taking
-
-            if current_adx > 25 and current_rsi < 48:  # More conservative conditions for liquidation
-                if (current_signal > current_macd and current_rsi < 40 or  # Maintain a conservative RSI threshold
-                    current_ema21 > current_ema9 and current_rsi < 40 or
-                    current_rsi > 65 or
-                    current_close >= current_bb_upper):
-                    if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
-                        allocation_dict[ticker] = 0  # Liquidate the stock
-                        holding_dict[ticker] = 0  # Reset holding amount
-                        self.previous_signals[ticker] = None  # Reset previous signal on liquidation
-                else:
-                    continue
-
-        # Return the target allocation
-        return TargetAllocation(allocation_dict)
+            current_signal_valid = (
+                (current
