@@ -41,4 +41,10 @@ class MACD_ADX_Strategy(Strategy):
                 self.previous_signals[ticker] = "bullish"
 
             # Exit Condition: Signal line crosses above the MACD line
-            elif current_signal > current_mac
+            elif current_signal > current_macd and difference > 0.5 and current_adx > 19 and holding_dict[ticker] > 0:
+                allocation_dict[ticker] = 0  # Liquidate the stock
+                holding_dict[ticker] = 0  # Reset holding amount
+                self.previous_signals[ticker] = "bearish"
+
+        # Return the target allocation
+        return TargetAllocation(allocation_dict)
