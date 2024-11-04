@@ -11,7 +11,7 @@ class TradingStrategy(Strategy):
 
     @property
     def interval(self):
-        return "1hour"  # Set interval to 5 minutes
+        return "5min"  # Set interval to 5 minutes
 
     @property
     def assets(self):
@@ -61,12 +61,11 @@ class TradingStrategy(Strategy):
                 holding_dict[ticker] = 0  # Reset holding amount
                 self.previous_signals[ticker] = None  # Reset previous signal on liquidation
 
-            # Current signal evaluation
-            current_signal_valid = (current_rsi < 30 or current_rsi > 50) and current_adx > 20 and (
+            # Current signal evaluation with more conservative thresholds
+            current_signal_valid = (current_rsi < 28 or current_rsi > 52) and current_adx > 25 and (
                 current_close <= current_bb_lower or
-                current_ema9 > current_ema21 or
-                (current_ema9 > current_ema21 and current_rsi > 55) or  # More aggressive bullish confirmation
-                (current_macd > current_signal and current_rsi > 55)  # Strengthened MACD condition
+                (current_ema9 > current_ema21 and current_rsi > 60) or  # More conservative bullish confirmation
+                (current_macd > current_signal and current_rsi > 60)  # Strengthened MACD condition
             )
 
             # Delayed entry logic: check the previous signal
@@ -76,14 +75,14 @@ class TradingStrategy(Strategy):
             else:
                 self.previous_signals[ticker] = current_signal_valid  # Store the current signal state for the next interval
 
-            # Liquidation Conditions
+            # Liquidation Conditions with a conservative profit-taking strategy
             current_value = holding_dict[ticker] * current_close
-            liquidate_value = allocation_dict[ticker] * 1.05  # Adjusted for quicker profit-taking
+            liquidate_value = allocation_dict[ticker] * 1.06  # More conservative profit-taking
 
-            if current_adx > 20 and current_rsi < 50:
-                if (current_signal > current_macd and current_rsi < 45 or  # Maintain a conservative RSI threshold
-                    current_ema21 > current_ema9 and current_rsi < 45 or
-                    current_rsi > 70 or
+            if current_adx > 25 and current_rsi < 48:  # More conservative conditions for liquidation
+                if (current_signal > current_macd and current_rsi < 40 or  # Maintain a conservative RSI threshold
+                    current_ema21 > current_ema9 and current_rsi < 40 or
+                    current_rsi > 65 or
                     current_close >= current_bb_upper):
                     if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
                         allocation_dict[ticker] = 0  # Liquidate the stock
