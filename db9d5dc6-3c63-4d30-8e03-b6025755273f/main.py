@@ -5,13 +5,13 @@ from .macd import MACD  # Import the MACD function from the macd module
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "AAPL", "GOOGL", "AMZN"#, "META", 
-            #"NVDA", "AMD", "TSLA", "WMT" #, "PLTR"
-        ]  # Adjusted tickers as needed
+            "AAPL", "GOOGL", "AMZN"  # Adjusted tickers as needed
+        ]
+        self.previous_signals = {ticker: None for ticker in self.tickers}  # Store previous signal states
 
     @property
     def interval(self):
-        return "1hour"  # Changed from "1hour" to "5min"
+        return "5min"  # Set interval to 5 minutes
 
     @property
     def assets(self):
@@ -59,21 +59,26 @@ class TradingStrategy(Strategy):
             ):
                 allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
                 holding_dict[ticker] = 0  # Reset holding amount
+                self.previous_signals[ticker] = None  # Reset previous signal on liquidation
 
-            # Investment Conditions (removed holding_dict[ticker] == 0 condition)
-            if (current_rsi < 30 or current_rsi > 50) and current_adx > 20:
-                if (current_close <= current_bb_lower or
-                    current_ema9 > current_ema21 or
-                    (current_ema9 > current_ema21 and current_rsi > 55) or  # More aggressive bullish confirmation
-                    (current_macd > current_signal and current_rsi > 55)):  # Strengthened MACD condition
-                    allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
-                    holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
-                else:
-                    continue
+            # Current signal evaluation
+            current_signal_valid = (current_rsi < 30 or current_rsi > 50) and current_adx > 20 and (
+                current_close <= current_bb_lower or
+                current_ema9 > current_ema21 or
+                (current_ema9 > current_ema21 and current_rsi > 55) or  # More aggressive bullish confirmation
+                (current_macd > current_signal and current_rsi > 55)  # Strengthened MACD condition
+            )
+
+            # Delayed entry logic: check the previous signal
+            if current_signal_valid and self.previous_signals[ticker] is True:
+                allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
+                holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
+            else:
+                self.previous_signals[ticker] = current_signal_valid  # Store the current signal state for the next interval
 
             # Liquidation Conditions
             current_value = holding_dict[ticker] * current_close
-            liquidate_value = allocation_dict[ticker] * 1.03  # Adjusted for quicker profit-taking
+            liquidate_value = allocation_dict[ticker] * 1.05  # Adjusted for quicker profit-taking
 
             if current_adx > 20 and current_rsi < 50:
                 if (current_signal > current_macd and current_rsi < 45 or  # Maintain a conservative RSI threshold
@@ -83,6 +88,7 @@ class TradingStrategy(Strategy):
                     if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
                         allocation_dict[ticker] = 0  # Liquidate the stock
                         holding_dict[ticker] = 0  # Reset holding amount
+                        self.previous_signals[ticker] = None  # Reset previous signal on liquidation
                 else:
                     continue
 
