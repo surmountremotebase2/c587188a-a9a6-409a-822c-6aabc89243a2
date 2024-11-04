@@ -5,13 +5,13 @@ from .macd import MACD  # Import the MACD function from the macd module
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "GOOGL", "AAPL"#, "META", "AMZN", 
-            #"NVDA", "AMD", "TSLA", "WMT", "PLTR"
+            "META", "AAPL", "AMZN", "GOOGL", 
+            "NVDA", "AMD", "TSLA", "WMT" #, "PLTR"
         ]  # Adjusted tickers as needed
 
     @property
     def interval(self):
-        return "1hour"
+        return "1hour"  # Changed from "1hour" to "5min"
 
     @property
     def assets(self):
@@ -24,11 +24,11 @@ class TradingStrategy(Strategy):
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 14)  # RSI with a period of 14
-            ema9 = EMA(ticker, ohlcv, 9)       # EMA with a period of 9
-            ema21 = EMA(ticker, ohlcv, 21)     # EMA with a period of 21
-            bb_data = BB(ticker, ohlcv, 20, 2)  # Bollinger Bands length 20 std 2
-            adx = ADX(ticker, ohlcv, 14)       # Calculate ADX from surmount
+            rsi_data = RSI(ticker, ohlcv, 14)
+            ema9 = EMA(ticker, ohlcv, 9)
+            ema21 = EMA(ticker, ohlcv, 21)
+            bb_data = BB(ticker, ohlcv, 20, 2)
+            adx = ADX(ticker, ohlcv, 14)
 
             if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['upper']) < 1:
                 continue
@@ -46,8 +46,17 @@ class TradingStrategy(Strategy):
             current_macd = macd_line[-1]
             current_signal = signal_line[-1]
 
-            # Stop-loss condition: Liquidate if current price drops more than 3% from holding value
-            if holding_dict[ticker] > 0 and current_close < (holding_dict[ticker] * 0.97):
+            # Calculate the highest prices over specified intervals
+            highest_1hour = max(close_prices[-12:]) if len(close_prices) >= 12 else current_close
+            highest_4hour = max(close_prices[-48:]) if len(close_prices) >= 48 else current_close
+            highest_1day = max(close_prices[-288:]) if len(close_prices) >= 288 else current_close
+
+            # Stop-loss condition: Liquidate if the current price drops 3% within any of the specified periods
+            if holding_dict[ticker] > 0 and (
+                current_close < highest_1hour * 0.97 or
+                current_close < highest_4hour * 0.97 or
+                current_close < highest_1day * 0.97
+            ):
                 allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
                 holding_dict[ticker] = 0  # Reset holding amount
 
