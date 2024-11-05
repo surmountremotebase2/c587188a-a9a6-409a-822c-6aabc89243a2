@@ -58,8 +58,8 @@ class TradingStrategy(Strategy):
 
             # Entry conditions
             if (
-                (current_short_ma > current_long_ma and current_rsi < 40 and (current_macd > current_signal or current_slope_value > 0)) or
-                (current_rsi < 35 and current_close <= current_bb_lower and current_momentum_value > 0)
+                (current_short_ma > current_long_ma and current_macd > current_signal and (current_rsi < 40 or current_slope_value > 0)) or
+                ((current_rsi < 40 or and current_momentum_value > 0) and current_close <= current_bb_lower)
             ):
                 allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
                 self.holding_dict[ticker] = allocation_dict[ticker] / current_close  # Update holding amount
@@ -67,8 +67,8 @@ class TradingStrategy(Strategy):
 
             # Exit conditions
             elif (
-                (current_long_ma > current_short_ma and current_rsi > 60 and current_signal > current_macd and current_slope_value < 0) or
-                (current_rsi > 65 and current_close >= current_bb_upper and current_momentum_value < 0)
+                (current_long_ma > current_short_ma and current_signal > current_macd and (current_slope_value < 0 or current_rsi > 60)) or
+                ((current_rsi > 65 or current_momentum_value < 0) and current_close >= current_bb_upper)
             ):
                 if self.holding_dict[ticker] > 0:
                     allocation_dict[ticker] = 0  # Liquidate the stock
