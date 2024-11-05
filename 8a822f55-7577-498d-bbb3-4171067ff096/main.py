@@ -10,7 +10,7 @@ class TradingStrategy(Strategy):
 
     @property
     def interval(self):
-        return "1hour"  # You can change the interval to your preference
+        return "5min"  # You can change the interval to your preference
 
     @property
     def assets(self):
