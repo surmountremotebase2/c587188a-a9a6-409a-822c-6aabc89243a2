@@ -1,5 +1,5 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope  # Removed Stochastic
+from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope  # Ensure all necessary imports are present
 from .macd import MACD  # Ensure MACD function is correctly imported
 
 class TradingStrategy(Strategy):
@@ -10,7 +10,7 @@ class TradingStrategy(Strategy):
 
     @property
     def interval(self):
-        return "5min"  # You can change the interval to your preference
+        return "1hour"  # Set the interval to 1 hour
 
     @property
     def assets(self):
@@ -32,10 +32,15 @@ class TradingStrategy(Strategy):
             macd_line, signal_line = MACD(close_prices, 9, 21, 8)
             bb_data = BB(ticker, ohlcv, 10, 2)
             atr = ATR(ticker, ohlcv, 10)
-            momentum_values = Momentum(ticker, data["ohlcv"], length=10)
-            slope_values = Slope(ticker, data["ohlcv"], length=5)
+            momentum_values = Momentum(ticker, ohlcv, length=10)
+            slope_values = Slope(ticker, ohlcv, length=5)
 
-            if len(short_term_ma) < 1 or len(long_term_ma) < 1 or len(rsi) < 1 or len(macd_line) < 1 or len(signal_line) < 1:
+            # Ensure there are enough data points for all indicators
+            if (
+                len(short_term_ma) < 1 or len(long_term_ma) < 1 or len(rsi) < 1 or 
+                len(macd_line) < 1 or len(signal_line) < 1 or len(bb_data['lower']) < 1 or 
+                len(bb_data['upper']) < 1 or len(momentum_values) < 1 or len(slope_values) < 1
+            ):
                 continue
 
             # Current values
@@ -53,12 +58,8 @@ class TradingStrategy(Strategy):
 
             # Entry conditions
             if (
-                current_short_ma > current_long_ma and  # Short-term MA above long-term MA
-                (current_rsi < 30 and  # RSI above 60
-                current_macd > current_signal) and  # MACD line above signal line
-                current_close <= current_bb_lower and  # Price touches or goes below lower Bollinger Band
-                (current_momentum_value > 0 or
-                current_slope_value > 0)
+                (current_short_ma > current_long_ma and current_rsi < 40 and (current_macd > current_signal or current_slope_value > 0)) or
+                (current_rsi < 35 and current_close <= current_bb_lower and current_momentum_value > 0)
             ):
                 allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
                 self.holding_dict[ticker] = allocation_dict[ticker] / current_close  # Update holding amount
@@ -66,11 +67,8 @@ class TradingStrategy(Strategy):
 
             # Exit conditions
             elif (
-                (current_long_ma > current_short_ma and  # Long-term MA above short-term MA
-                current_rsi > 65 and  # RSI above 65
-                current_signal > current_macd) or  # Signal line above MACD line
-                current_close >= current_bb_upper or  # Price touches or goes above upper Bollinger Band
-                (current_momentum_value < 0 and current_slope_value < 0 and current_rsi > 65)
+                (current_long_ma > current_short_ma and current_rsi > 60 and current_signal > current_macd and current_slope_value < 0) or
+                (current_rsi > 65 and current_close >= current_bb_upper and current_momentum_value < 0)
             ):
                 if self.holding_dict[ticker] > 0:
                     allocation_dict[ticker] = 0  # Liquidate the stock
