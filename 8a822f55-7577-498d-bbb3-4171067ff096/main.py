@@ -54,11 +54,11 @@ class TradingStrategy(Strategy):
             # Entry conditions
             if (
                 current_short_ma > current_long_ma and  # Short-term MA above long-term MA
-                current_rsi > 60 and  # RSI above 60
+                (current_rsi > 60 and  # RSI above 60
                 current_macd > current_signal and  # MACD line above signal line
-                current_close <= current_bb_lower and  # Price touches or goes below lower Bollinger Band
-                current_momentum_value > 0 and
-                current_slope_value > 0
+                current_close <= current_bb_lower) and  # Price touches or goes below lower Bollinger Band
+                (current_momentum_value > 0 or
+                current_slope_value > 0)
             ):
                 allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
                 self.holding_dict[ticker] = allocation_dict[ticker] / current_close  # Update holding amount
