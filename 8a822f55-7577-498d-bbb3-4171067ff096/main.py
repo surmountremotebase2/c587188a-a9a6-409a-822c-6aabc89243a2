@@ -1,5 +1,5 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope# Removed Stochastic
+from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope  # Removed Stochastic
 from .macd import MACD  # Ensure MACD function is correctly imported
 
 class MovingAverageRSIMACDBBATRStrategy(Strategy):
@@ -56,7 +56,7 @@ class MovingAverageRSIMACDBBATRStrategy(Strategy):
                 current_short_ma > current_long_ma and  # Short-term MA above long-term MA
                 current_rsi > 60 and  # RSI above 60
                 current_macd > current_signal and  # MACD line above signal line
-                current_close <= current_bb_lower and # Price touches or goes below lower Bollinger Band
+                current_close <= current_bb_lower and  # Price touches or goes below lower Bollinger Band
                 current_momentum_value > 0 and
                 current_slope_value > 0
             ):
