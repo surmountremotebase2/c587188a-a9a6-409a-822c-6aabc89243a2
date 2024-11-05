@@ -4,7 +4,9 @@ from .macd import MACD  # Make sure MACD function from your custom module is cor
 
 class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL", "NVDA", "GOOGL", "AMZN"]
+        self.tickers = [
+            "AAPL", "NVDA", "GOOGL", "AMZN"
+            ]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
         self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for ATR-based stop loss
 
