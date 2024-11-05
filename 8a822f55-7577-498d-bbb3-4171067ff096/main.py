@@ -54,9 +54,9 @@ class TradingStrategy(Strategy):
             # Entry conditions
             if (
                 current_short_ma > current_long_ma and  # Short-term MA above long-term MA
-                (current_rsi > 60 and  # RSI above 60
-                current_macd > current_signal and  # MACD line above signal line
-                current_close <= current_bb_lower) and  # Price touches or goes below lower Bollinger Band
+                (current_rsi < 30 and  # RSI above 60
+                current_macd > current_signal) and  # MACD line above signal line
+                current_close <= current_bb_lower and  # Price touches or goes below lower Bollinger Band
                 (current_momentum_value > 0 or
                 current_slope_value > 0)
             ):
@@ -66,9 +66,9 @@ class TradingStrategy(Strategy):
 
             # Exit conditions
             elif (
-                current_long_ma > current_short_ma or  # Long-term MA above short-term MA
-                current_rsi > 65 or  # RSI above 65
-                current_signal > current_macd or  # Signal line above MACD line
+                (current_long_ma > current_short_ma and  # Long-term MA above short-term MA
+                current_rsi > 65 and  # RSI above 65
+                current_signal > current_macd) or  # Signal line above MACD line
                 current_close >= current_bb_upper or  # Price touches or goes above upper Bollinger Band
                 (current_momentum_value < 0 and current_slope_value < 0 and current_rsi > 65)
             ):
