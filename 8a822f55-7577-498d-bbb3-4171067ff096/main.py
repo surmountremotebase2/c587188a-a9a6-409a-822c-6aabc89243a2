@@ -5,7 +5,7 @@ import time  # Import time to manage timestamps
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["QQQ", "SPY", "IWM", "AAPL", "NVDA", "GOOGL", "AMZN"]
+        self.tickers = ["AAPL", "NVDA", "GOOGL", "AMZN"] # "QQQ", "SPY", "IWM", 
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
         self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for ATR-based stop loss
         self.entry_times = {ticker: None for ticker in self.tickers}  # Track entry times
