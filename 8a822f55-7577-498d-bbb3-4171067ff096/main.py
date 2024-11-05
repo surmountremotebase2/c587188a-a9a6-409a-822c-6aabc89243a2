@@ -6,7 +6,7 @@ import time  # Import time to manage timestamps
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "QQQ", "SPY", "IWM", 
+            #"QQQ", "SPY", "IWM", 
             "META", "AAPL", "NFLX", "AMZN", "GOOGL", 
             "NVDA", "AVGO", "AMD", "QCOM", "MU", "TSLA"
             ] # 
