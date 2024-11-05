@@ -1,16 +1,16 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import RSI, EMA, BB, ADX
-from .macd import MACD  # Import the MACD function from the macd module
+from surmount.technical_indicators import MA, RSI, BB, Stochastic, ATR
+from .macd import MACD  # Make sure MACD function from your custom module is correctly imported
 
-class TradingStrategy(Strategy):
+class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
     def __init__(self):
-        self.tickers = [
-            "QQQ", "SPY", "IWM"
-        ]  # Adjusted tickers as needed
+        self.tickers = ["AAPL", "NVDA", "GOOGL", "AMZN"]
+        self.holding_dict = {ticker: 0 for ticker in self.tickers}
+        self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for ATR-based stop loss
 
     @property
     def interval(self):
-        return "1day"
+        return "1hour"  # You can change the interval to your preference
 
     @property
     def assets(self):
@@ -18,63 +18,67 @@ class TradingStrategy(Strategy):
 
     def run(self, data):
         allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocations to zero
-        holding_dict = {ticker: 0 for ticker in self.tickers}  # Track holding amounts
         ohlcv = data.get("ohlcv")
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
-            rsi_data = RSI(ticker, ohlcv, 14)  # RSI with a period of 14
-            ema9 = EMA(ticker, ohlcv, 9)       # EMA with a period of 9
-            ema21 = EMA(ticker, ohlcv, 21)     # EMA with a period of 21
-            bb_data = BB(ticker, ohlcv, 20, 2)  # Bollinger Bands length 20 std 2
-            adx = ADX(ticker, ohlcv, 14)       # Calculate ADX from surmount
-
-            if len(close_prices) < 1 or len(rsi_data) < 1 or len(ema9) < 1 or len(ema21) < 1 or len(bb_data['upper']) < 1:
+            if len(close_prices) < 20:  # Ensure there are enough data points
                 continue
 
-            # Set current values for RSI, EMA, BB, ADX
-            current_rsi = rsi_data[-1]
-            current_ema9 = ema9[-1]
-            current_ema21 = ema21[-1]
+            # Indicators
+            short_term_ma = MA(ticker, ohlcv, 5)
+            long_term_ma = MA(ticker, ohlcv, 20)
+            rsi = RSI(ticker, ohlcv, 9)
+            macd_line, signal_line = MACD(close_prices, 9, 21, 8)
+            bb_data = BB(ticker, ohlcv, 10, 2)
+            stochastic = Stochastic(ticker, ohlcv, 13, 3, 3)
+            atr = ATR(ticker, ohlcv, 10)
+
+            if len(short_term_ma) < 1 or len(long_term_ma) < 1 or len(rsi) < 1 or len(macd_line) < 1 or len(signal_line) < 1:
+                continue
+
+            # Current values
+            current_short_ma = short_term_ma[-1]
+            current_long_ma = long_term_ma[-1]
+            current_rsi = rsi[-1]
+            current_macd = macd_line[-1]
+            current_signal = signal_line[-1]
             current_close = close_prices[-1]
             current_bb_lower = bb_data['lower'][-1]
             current_bb_upper = bb_data['upper'][-1]
-            current_adx = adx[-1]
+            current_stochastic = stochastic['k'][-1]  # 'k' line for Stochastic
+            current_atr = atr[-1]
 
-            macd_line, signal_line = MACD(close_prices)
-            current_macd = macd_line[-1]
-            current_signal = signal_line[-1]
+            # Entry conditions
+            if (
+                current_short_ma > current_long_ma and  # Short-term MA above long-term MA
+                current_rsi > 60 and  # RSI above 60
+                current_macd > current_signal and  # MACD line above signal line
+                current_close <= current_bb_lower and  # Price touches or goes below lower Bollinger Band
+                current_stochastic < 18  # Stochastic Oscillator goes below 18
+            ):
+                allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
+                self.holding_dict[ticker] = allocation_dict[ticker] / current_close  # Update holding amount
+                self.entry_prices[ticker] = current_close  # Set the entry price
 
-            # Stop-loss condition: Liquidate if current price drops more than 3% from holding value
-            if holding_dict[ticker] > 0 and current_close < (holding_dict[ticker] * 0.97):
-                allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
-                holding_dict[ticker] = 0  # Reset holding amount
+            # Exit conditions
+            elif (
+                current_long_ma > current_short_ma or  # Long-term MA above short-term MA
+                current_rsi > 65 or  # RSI above 65
+                current_signal > current_macd or  # Signal line above MACD line
+                current_close >= current_bb_upper or  # Price touches or goes above upper Bollinger Band
+                current_stochastic > 80  # Stochastic Oscillator goes above 80
+            ):
+                if self.holding_dict[ticker] > 0:
+                    allocation_dict[ticker] = 0  # Liquidate the stock
+                    self.holding_dict[ticker] = 0  # Reset holding amount
 
-            # Investment Conditions (removed holding_dict[ticker] == 0 condition)
-            if (current_rsi < 30 or current_rsi > 55) and current_adx > 20:
-                if (current_close <= current_bb_lower or
-                    current_ema9 > current_ema21 or
-                    (current_ema9 > current_ema21 and current_rsi > 55) or  # More aggressive bullish confirmation
-                    (current_macd > current_signal and current_rsi > 55)):  # Strengthened MACD condition
-                    allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
-                    holding_dict[ticker] += allocation_dict[ticker] / current_close  # Update holding amount
-                else:
-                    continue
-
-            # Liquidation Conditions
-            current_value = holding_dict[ticker] * current_close
-            liquidate_value = allocation_dict[ticker] * 1.03  # Adjusted for quicker profit-taking
-
-            if current_adx > 20 and current_rsi < 50:
-                if (current_signal > current_macd and current_rsi < 50 or  # Maintain a conservative RSI threshold
-                    current_ema21 > current_ema9 and current_rsi < 50 or
-                    current_rsi > 70 or
-                    current_close >= current_bb_upper):
-                    if current_value > liquidate_value:  # Only liquidate if the current value is greater than the allocation
-                        allocation_dict[ticker] = 0  # Liquidate the stock
-                        holding_dict[ticker] = 0  # Reset holding amount
-                else:
-                    continue
+            # Stop-loss based on ATR
+            if self.holding_dict[ticker] > 0:
+                stop_loss_price = self.entry_prices[ticker] - (1.0 * current_atr)
+                if current_close < stop_loss_price:
+                    allocation_dict[ticker] = 0  # Liquidate the stock
+                    self.holding_dict[ticker] = 0  # Reset holding amount
 
         # Return the target allocation
         return TargetAllocation(allocation_dict)
