@@ -1,8 +1,8 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import SMA, RSI, BB, Stochastic, ATR  # Replace MA with SMA if that's the correct one
+from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope# Removed Stochastic
 from .macd import MACD  # Ensure MACD function is correctly imported
 
-class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
+class MovingAverageRSIMACDBBATRStrategy(Strategy):
     def __init__(self):
         self.tickers = ["AAPL", "NVDA", "GOOGL", "AMZN"]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
@@ -10,7 +10,7 @@ class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
 
     @property
     def interval(self):
-        return "1day"  # You can change the interval to your preference
+        return "1hour"  # You can change the interval to your preference
 
     @property
     def assets(self):
@@ -26,13 +26,14 @@ class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
                 continue
 
             # Indicators
-            short_term_ma = SMA(ticker, ohlcv, 5)  # Use SMA for short-term moving average
-            long_term_ma = SMA(ticker, ohlcv, 20)  # Use SMA for long-term moving average
+            short_term_ma = SMA(ticker, ohlcv, 5)  # Short-term moving average
+            long_term_ma = SMA(ticker, ohlcv, 20)  # Long-term moving average
             rsi = RSI(ticker, ohlcv, 9)
             macd_line, signal_line = MACD(close_prices, 9, 21, 8)
             bb_data = BB(ticker, ohlcv, 10, 2)
-            stochastic = Stochastic(ticker, ohlcv, 13, 3, 3)
             atr = ATR(ticker, ohlcv, 10)
+            momentum_values = Momentum(ticker, data["ohlcv"], length=10)
+            slope_values = Slope(ticker, data["ohlcv"], length=5)
 
             if len(short_term_ma) < 1 or len(long_term_ma) < 1 or len(rsi) < 1 or len(macd_line) < 1 or len(signal_line) < 1:
                 continue
@@ -46,16 +47,18 @@ class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
             current_close = close_prices[-1]
             current_bb_lower = bb_data['lower'][-1]
             current_bb_upper = bb_data['upper'][-1]
-            current_stochastic = stochastic['k'][-1]  # 'k' line for Stochastic
             current_atr = atr[-1]
+            current_momentum_value = momentum_values[-1]
+            current_slope_value = slope_values[-1]
 
             # Entry conditions
             if (
                 current_short_ma > current_long_ma and  # Short-term MA above long-term MA
                 current_rsi > 60 and  # RSI above 60
                 current_macd > current_signal and  # MACD line above signal line
-                current_close <= current_bb_lower and  # Price touches or goes below lower Bollinger Band
-                current_stochastic < 18  # Stochastic Oscillator is below 18
+                current_close <= current_bb_lower and # Price touches or goes below lower Bollinger Band
+                current_momentum_value > 0 and
+                current_slope_value > 0
             ):
                 allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
                 self.holding_dict[ticker] = allocation_dict[ticker] / current_close  # Update holding amount
@@ -67,7 +70,7 @@ class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
                 current_rsi > 65 or  # RSI above 65
                 current_signal > current_macd or  # Signal line above MACD line
                 current_close >= current_bb_upper or  # Price touches or goes above upper Bollinger Band
-                current_stochastic > 80  # Stochastic Oscillator goes above 80
+                (current_momentum_value < 0 and current_slope_value < 0 and current_rsi > 65)
             ):
                 if self.holding_dict[ticker] > 0:
                     allocation_dict[ticker] = 0  # Liquidate the stock
