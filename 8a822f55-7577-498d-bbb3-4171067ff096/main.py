@@ -10,7 +10,7 @@ class TradingStrategy(Strategy):
 
     @property
     def interval(self):
-        return "4hour"  # Set the interval to 1 hour use 4hour for backtest
+        return "1hour"  # Set the interval to 1 hour use 4hour for backtest
 
     @property
     def assets(self):
