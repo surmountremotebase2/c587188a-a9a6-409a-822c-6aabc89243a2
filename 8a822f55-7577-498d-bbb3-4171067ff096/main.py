@@ -1,16 +1,10 @@
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import MA, RSI, BB, Stochastic, ATR
-from .macd import MACD  # Make sure MACD function from your custom module is correctly imported
+from surmount.technical_indicators import SMA, RSI, BB, Stochastic, ATR  # Replace MA with SMA if that's the correct one
+from .macd import MACD  # Ensure MACD function is correctly imported
 
 class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
     def __init__(self):
-        self.tickers = [
-            "QQQ", "SPY", "IWM",
-            "AAPL", "META", "AMZN", "NFLX", "GOOGL",
-            "NVDA", "AMD", "MSFT", 
-            "PYPL", "SHOP", "SQ", "MU", "QCOM", "AVGO",
-            "AI", "PLTR", "SNOW", "CMR", "NOW"
-            ]
+        self.tickers = ["AAPL", "NVDA", "GOOGL", "AMZN"]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
         self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for ATR-based stop loss
 
@@ -32,8 +26,8 @@ class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
                 continue
 
             # Indicators
-            short_term_ma = MA(ticker, ohlcv, 5)
-            long_term_ma = MA(ticker, ohlcv, 20)
+            short_term_ma = SMA(ticker, ohlcv, 5)  # Use SMA for short-term moving average
+            long_term_ma = SMA(ticker, ohlcv, 20)  # Use SMA for long-term moving average
             rsi = RSI(ticker, ohlcv, 9)
             macd_line, signal_line = MACD(close_prices, 9, 21, 8)
             bb_data = BB(ticker, ohlcv, 10, 2)
@@ -61,7 +55,7 @@ class MovingAverageRSIMACDBBStochasticATRStrategy(Strategy):
                 current_rsi > 60 and  # RSI above 60
                 current_macd > current_signal and  # MACD line above signal line
                 current_close <= current_bb_lower and  # Price touches or goes below lower Bollinger Band
-                current_stochastic < 18  # Stochastic Oscillator goes below 18
+                current_stochastic < 18  # Stochastic Oscillator is below 18
             ):
                 allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
                 self.holding_dict[ticker] = allocation_dict[ticker] / current_close  # Update holding amount
