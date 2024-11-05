@@ -2,7 +2,7 @@ from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope  # Removed Stochastic
 from .macd import MACD  # Ensure MACD function is correctly imported
 
-class MovingAverageRSIMACDBBATRStrategy(Strategy):
+class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = ["AAPL", "NVDA", "GOOGL", "AMZN"]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
