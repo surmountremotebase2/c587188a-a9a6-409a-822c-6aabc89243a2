@@ -65,7 +65,7 @@ class TradingStrategy(Strategy):
                 current_rsi < 40 and  # RSI below 40
                 current_macd > current_signal) or  # MACD line above signal line
                 current_close <= current_bb_lower and  # Price touches or goes below lower Bollinger Band
-                (current_momentum_value > 0 or current_slope_value > 0))  # Momentum or slope is positive
+                (current_momentum_value > 0 or current_slope_value > 0)  # Momentum or slope is positive
             ):
                 if self.holding_dict[ticker] == 0:  # Check if we are not already holding
                     allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
