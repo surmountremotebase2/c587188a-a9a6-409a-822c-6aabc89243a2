@@ -36,6 +36,7 @@ class TradingStrategy(Strategy):
             bb_data = BB(ticker, ohlcv, 20, 2)
             momentum_values = Momentum(ticker, ohlcv, length=10)
             slope_values = Slope(ticker, ohlcv, length=5)
+            adx = ADX(ticker, ohlcv, 14)
 
             if len(ema9) < 1 or len(ema21) < 1 or len(rsi) < 1 or len(macd_line) < 1 or len(signal_line) < 1:
                 continue
@@ -51,6 +52,7 @@ class TradingStrategy(Strategy):
             current_bb_upper = bb_data['upper'][-1]
             current_momentum_value = momentum_values[-1]
             current_slope_value = slope_values[-1]
+            current_adx = adx[-1]
 
             # Buy conditions (if 3 out of 4 conditions are met)
             buy_conditions_met = sum([
