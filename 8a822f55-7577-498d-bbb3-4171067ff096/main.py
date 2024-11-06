@@ -70,9 +70,9 @@ class TradingStrategy(Strategy):
                 current_macd > current_signal and current_rsi > 55,  # MACD crosses above signal line and RSI > 55
             ])
 
-            if current_adx > 25:
-                if buy_conditions_met >= 3:  # Buy if any two conditions are met
-                    allocation_dict[ticker] += 1 * (2000 / len(self.tickers))  # Allocate 30% per condition met
+            if current_adx > 24:
+                if buy_conditions_met >= 3:  # Buy if any three conditions are met
+                    allocation_dict[ticker] += (buy_conditions_met / 6) * (2000 / len(self.tickers))  # Allocate dynamically based on conditions met
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                     self.entry_prices[ticker] = current_close
 
@@ -85,7 +85,7 @@ class TradingStrategy(Strategy):
                 current_macd < current_signal and current_rsi < 47,  # MACD crosses below signal line and RSI < 45
             ])
 
-            if current_adx > 25: 
+            if current_adx > 24: 
                 if sell_conditions_met >= 3:
                     if self.sell_condition_times[ticker] is None:
                         # Record the current time if this is the first occurrence
@@ -100,7 +100,7 @@ class TradingStrategy(Strategy):
 
             # Stop-loss based on ATR
             if self.holding_dict[ticker] > 0:
-                stop_loss_price = self.entry_prices[ticker] - (1.1 * current_atr)
+                stop_loss_price = self.entry_prices[ticker] - (1.1 * current_atr)  # ATR-based stop loss with adjusted multiplier
                 if current_close < stop_loss_price:
                     allocation_dict[ticker] = 0  # Liquidate the stock
                     self.holding_dict[ticker] = 0
