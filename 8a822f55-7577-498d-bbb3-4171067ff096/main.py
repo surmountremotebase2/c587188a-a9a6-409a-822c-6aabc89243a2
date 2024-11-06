@@ -34,10 +34,10 @@ class TradingStrategy(Strategy):
             rsi = RSI(ticker, ohlcv, 9)
             macd_line, signal_line = MACD(close_prices, 9, 21, 8)
             bb_data = BB(ticker, ohlcv, 20, 2)
-            momentum_values = Momentum(ticker, ohlcv, length=10)
+            momentum_values = Momentum(ticker, ohlcv, length=8) #momentum_values = Momentum(ticker, ohlcv, length=10)
             slope_values = Slope(ticker, ohlcv, length=5)
-            adx = ADX(ticker, ohlcv, 14)
-            atr = ATR(ticker, ohlcv, 10)
+            adx = ADX(ticker, ohlcv, 10) #adx = ADX(ticker, ohlcv, 14)
+            atr = ATR(ticker, ohlcv, 8) #atr = ATR(ticker, ohlcv, 10)
 
             if len(ema9) < 1 or len(ema21) < 1 or len(rsi) < 1 or len(macd_line) < 1 or len(signal_line) < 1:
                 continue
