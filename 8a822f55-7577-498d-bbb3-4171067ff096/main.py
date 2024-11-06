@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope
+from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope, ADX
 from .macd import MACD
 
 class TradingStrategy(Strategy):
@@ -37,6 +37,7 @@ class TradingStrategy(Strategy):
             atr = ATR(ticker, ohlcv, 10)
             momentum_values = Momentum(ticker, ohlcv, length=10)
             slope_values = Slope(ticker, ohlcv, length=5)
+            adx = ADX(ticker, ohlcv, 14)       # Calculate ADX from surmount
 
             if len(short_term_ma) < 1 or len(long_term_ma) < 1 or len(rsi) < 1 or len(macd_line) < 1 or len(signal_line) < 1:
                 continue
@@ -53,6 +54,7 @@ class TradingStrategy(Strategy):
             current_atr = atr[-1]
             current_momentum_value = momentum_values[-1]
             current_slope_value = slope_values[-1]
+            current_adx = adx[-1]
 
             # Buy conditions (any two conditions met)
             buy_conditions_met = sum([
@@ -62,10 +64,11 @@ class TradingStrategy(Strategy):
                 current_macd > current_signal and current_rsi > 53,  # MACD crosses above signal line and RSI > 55
             ])
 
-            if buy_conditions_met >= 2:  # Buy if any two conditions are met
-                allocation_dict[ticker] += 0.3 * (2000 / len(self.tickers))  # Allocate 30% per condition met
-                self.holding_dict[ticker] += allocation_dict[ticker] / current_close
-                self.entry_prices[ticker] = current_close
+            if (current_rsi < 30 or current_rsi > 55) and current_adx > 25:
+                if buy_conditions_met >= 2:  # Buy if any two conditions are met
+                    allocation_dict[ticker] += 0.3 * (2000 / len(self.tickers))  # Allocate 30% per condition met
+                    self.holding_dict[ticker] += allocation_dict[ticker] / current_close
+                    self.entry_prices[ticker] = current_close
 
             # Sell conditions (any two conditions met)
             sell_conditions_met = sum([
@@ -75,17 +78,18 @@ class TradingStrategy(Strategy):
                 current_macd < current_signal and current_rsi < 47,  # MACD crosses below signal line and RSI < 45
             ])
 
-            if sell_conditions_met >= 2:
-                if self.sell_condition_times[ticker] is None:
-                    # Record the current time if this is the first occurrence
-                    self.sell_condition_times[ticker] = current_time
-                elif current_time >= self.sell_condition_times[ticker] + timedelta(minutes=5):
-                    # Check if 5 minutes have passed since the initial occurrence
-                    allocation_dict[ticker] = 0  # Liquidate the stock
-                    self.holding_dict[ticker] = 0
-                    self.sell_condition_times[ticker] = None  # Reset the timer
-            else:
-                self.sell_condition_times[ticker] = None  # Reset if conditions are no longer met
+            if current_adx > 25: 
+                if sell_conditions_met >= 2:
+                    if self.sell_condition_times[ticker] is None:
+                        # Record the current time if this is the first occurrence
+                        self.sell_condition_times[ticker] = current_time
+                    elif current_time >= self.sell_condition_times[ticker] + timedelta(minutes=5):
+                        # Check if 5 minutes have passed since the initial occurrence
+                        allocation_dict[ticker] = 0  # Liquidate the stock
+                        self.holding_dict[ticker] = 0
+                        self.sell_condition_times[ticker] = None  # Reset the timer
+                else:
+                    self.sell_condition_times[ticker] = None  # Reset if conditions are no longer met
 
             # Stop-loss based on ATR
             if self.holding_dict[ticker] > 0:
