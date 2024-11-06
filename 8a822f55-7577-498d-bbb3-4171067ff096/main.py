@@ -63,9 +63,9 @@ class TradingStrategy(Strategy):
             if (
                 (current_short_ma > current_long_ma and  # Short-term MA above long-term MA
                 current_rsi < 40 and  # RSI below 40
-                current_macd > current_signal and  # MACD line above signal line
+                current_macd > current_signal) or  # MACD line above signal line
                 current_close <= current_bb_lower and  # Price touches or goes below lower Bollinger Band
-                (current_momentum_value > 0 or current_slope_value > 0))  # Momentum or slope is positive
+                (current_rsi < 40 and current_slope_value > 0)
             ):
                 if self.holding_dict[ticker] == 0:  # Check if we are not already holding
                     allocation_dict[ticker] = 2000 / len(self.tickers)  # Invest equal proportion per ticker
@@ -74,7 +74,7 @@ class TradingStrategy(Strategy):
                     self.entry_times[ticker] = time.time()  # Record entry time
 
             # Check if we have held the position for at least 30 minutes (1800 seconds)
-            if self.holding_dict[ticker] > 0 and (time.time() - self.entry_times[ticker]) >= 1800:
+            if self.holding_dict[ticker] > 0 and (time.time() - self.entry_times[ticker]) >= 900:
                 # Exit conditions
                 if (
                     (current_long_ma > current_short_ma and  # Long-term MA above short-term MA
@@ -82,7 +82,7 @@ class TradingStrategy(Strategy):
                     current_signal > current_macd and  # Signal line above MACD line
                     current_slope_value < 0) or  # Slope is negative
                     current_close >= current_bb_upper or  # Price touches or goes above upper Bollinger Band
-                    (current_momentum_value < 0 and current_rsi > 65)  # Momentum is negative and RSI above 65
+                    (current_momentum_value < 0 and current_rsi > 60)  # Momentum is negative and RSI above 65
                 ):
                     allocation_dict[ticker] = 0  # Liquidate the stock
                     self.holding_dict[ticker] = 0  # Reset holding amount
