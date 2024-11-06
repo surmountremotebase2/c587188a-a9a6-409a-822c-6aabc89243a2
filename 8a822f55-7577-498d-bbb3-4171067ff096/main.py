@@ -7,9 +7,9 @@ class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
             "QQQ", "SPY", "IWM",
-            "META","AAPL", "AMZN", "NFLX", "GOOGL", "DIS", "HD", "WMT", "COST",
-            "TSLA", "NVDA", "MSFT", "NVDA", "AMD", "AVGO", "QCOM", "MU",
-            "KO", "PEP", "XOM", "PYPL", "V", "JPM", "PG" , "LMT", "NOC"
+            "META","AAPL", "AMZN", "NFLX", "GOOG", "DIS", "HD", "WMT", "COST", "SQ", "BIIB",
+            "TSLA", "NVDA", "MSFT", "NVDA", "AMD", "AVGO", "QCOM", "MU", "UNH", "SHOP", "AMGN",
+            "KO", "PEP", "XOM", "PYPL", "V", "JPM", "PG" , "LMT", "NOC", "CRM", "DHR", "NOW"
 
         ]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
