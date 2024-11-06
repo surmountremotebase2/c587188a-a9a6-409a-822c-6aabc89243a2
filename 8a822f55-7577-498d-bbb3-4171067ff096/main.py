@@ -62,17 +62,16 @@ class TradingStrategy(Strategy):
 
             # Buy conditions (any two conditions met)
             buy_conditions_met = sum([
-                current_ema9 > current_ema21,
-                current_rsi < 30,
+                current_ema9 > current_ema21 and current_rsi < 35,
                 current_ema9 > current_ema21 and current_rsi > 55,  # More aggressive bullish confirmation
-                current_rsi < 30 and current_macd > current_signal,  # RSI below 30 and MACD crosses above signal line
+                current_rsi < 35 and current_macd > current_signal,  # RSI below 30 and MACD crosses above signal line
                 current_close <= current_bb_lower and current_rsi < 35,  # Price below lower Bollinger Band and RSI < 30
                 current_slope_value > 0 and current_momentum_value > 0,  # Positive slope and increasing momentum
                 current_macd > current_signal and current_rsi > 55,  # MACD crosses above signal line and RSI > 55
             ])
 
             if current_adx > 25:
-                if buy_conditions_met >= 4:  # Buy if any two conditions are met
+                if buy_conditions_met >= 3:  # Buy if any two conditions are met
                     allocation_dict[ticker] += 1 * (2000 / len(self.tickers))  # Allocate 30% per condition met
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                     self.entry_prices[ticker] = current_close
