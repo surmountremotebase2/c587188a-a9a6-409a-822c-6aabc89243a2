@@ -65,7 +65,7 @@ class TradingStrategy(Strategy):
                 current_ema9 > current_ema21 and current_rsi < 35,
                 current_ema9 > current_ema21 and current_rsi > 55,  # More aggressive bullish confirmation
                 current_rsi < 35 and current_macd > current_signal,  # RSI below 30 and MACD crosses above signal line
-                current_close <= current_bb_lower and current_rsi < 35,  # Price below lower Bollinger Band and RSI < 30
+                current_close <= current_bb_lower,  # Price below lower Bollinger Band
                 current_slope_value > 0 and current_momentum_value > 0,  # Positive slope and increasing momentum
                 current_macd > current_signal and current_rsi > 55,  # MACD crosses above signal line and RSI > 55
             ])
