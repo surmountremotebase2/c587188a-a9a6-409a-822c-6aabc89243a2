@@ -92,7 +92,7 @@ class TradingStrategy(Strategy):
             ])
 
             if current_adx > 20: 
-                if sell_conditions_met >= 3:
+                if sell_conditions_met >= 2:
                     if self.sell_condition_times[ticker] is None:
                         # Record the current time if this is the first occurrence
                         self.sell_condition_times[ticker] = current_time
