@@ -7,9 +7,9 @@ class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
             "QQQ", "SPY", "IWM",
-            "META","AAPL", "AMZN", "NFLX", "GOOG", "DIS", "HD", "WMT", "COST", "SQ", "BIIB",
+            "META","AAPL", "AMZN", "NFLX", "GOOG", "DIS", "HD", "WMT", "SQ", "BIIB",
             "TSLA", "NVDA", "MSFT", "NVDA", "AMD", "AVGO", "QCOM", "MU", "UNH", "SHOP", "AMGN",
-            "KO", "PEP", "XOM", "PYPL", "V", "JPM", "PG" , "LMT", "NOC", "CRM", "DHR", "NOW"
+            "PEP", "XOM", "PYPL", "JPM", "PG", "LMT", "NOC", "CRM", "DHR", "NOW"
 
         ]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
@@ -78,7 +78,7 @@ class TradingStrategy(Strategy):
 
             if current_adx > 24:
                 if buy_conditions_met >= 3:  # Buy if any three conditions are met
-                    allocation_dict[ticker] += (buy_conditions_met / 6) * (2000 / len(self.tickers))  # Allocate dynamically based on conditions met
+                    allocation_dict[ticker] += (buy_conditions_met / 6) * (4000 / len(self.tickers))  # Allocate dynamically based on conditions met
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                     self.entry_prices[ticker] = current_close
 
