@@ -58,7 +58,7 @@ class TradingStrategy(Strategy):
             buy_conditions_met = sum([
                 current_slope_value > 0,  # Slope is positive
                 current_momentum_value > 0,  # Momentum is positive
-                current_ema9 > current_ema21 and current_rsi < 60,  # EMA9 crosses above EMA21 and RSI > 55
+                current_ema9 > current_ema21 and current_rsi < 65,  # EMA9 crosses above EMA21 and RSI > 55
             ])
 
             if buy_conditions_met >= 2:
