@@ -33,7 +33,7 @@ class TradingStrategy(Strategy):
             ema21 = EMA(ticker, ohlcv, 21)
             rsi = RSI(ticker, ohlcv, 9)
             macd_line, signal_line = MACD(close_prices, 9, 21, 8)
-            bb_data = BB(ticker, ohlcv, 10, 2)
+            bb_data = BB(ticker, ohlcv, 20, 2)
             momentum_values = Momentum(ticker, ohlcv, length=10)
             slope_values = Slope(ticker, ohlcv, length=5)
 
@@ -58,7 +58,7 @@ class TradingStrategy(Strategy):
                 current_momentum_value > 0,  # Momentum is positive
                 current_ema9 > current_ema21 and current_rsi < 60,  # EMA9 crosses above EMA21 and RSI > 55
                 current_macd > current_signal and current_momentum_value > 0,  # MACD crosses above signal and momentum is positive
-                current_rsi > 60 and current_close <= current_bb_lower,  # RSI < 40 and price touches/below lower Bollinger Band
+                current_close <= current_bb_lower,  # RSI < 40 and price touches/below lower Bollinger Band
                 
             ])
 
@@ -71,7 +71,7 @@ class TradingStrategy(Strategy):
             sell_conditions_met = sum([
                 current_ema21 > current_ema9 and current_rsi < 40,  # EMA21 crosses above EMA9 and RSI < 45
                 current_signal > current_macd and current_momentum_value < 0,  # Signal crosses above MACD and momentum is negative
-                current_rsi < 40 and current_close >= current_bb_upper,  # RSI > 60 and price touches/above upper Bollinger Band
+                current_close >= current_bb_upper,  # RSI > 60 and price touches/above upper Bollinger Band
                 current_momentum_value < 0,  # Momentum is negative
                 current_slope_value < 0  # Slope is negative
             ])
