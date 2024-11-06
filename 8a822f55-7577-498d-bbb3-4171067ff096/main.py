@@ -66,16 +66,15 @@ class TradingStrategy(Strategy):
 
             # Buy conditions (any two conditions met)
             buy_conditions_met = sum([
-                current_ema9 > current_ema21,
-                #current_ema9 > current_ema21 and current_rsi < 40,
-                #current_ema9 > current_ema21 and current_rsi > 50,  # More aggressive bullish confirmation
+                current_ema9 > current_ema21 and current_rsi < 40,
+                current_ema9 > current_ema21 and current_rsi > 50,  # More aggressive bullish confirmation
                 current_macd > current_signal and current_rsi < 40,  # RSI below 30 and MACD crosses above signal line
                 current_macd > current_signal and current_rsi > 50,  # MACD crosses above signal line and RSI > 55
                 current_close <= current_bb_lower and current_rsi < 40,  # Price below lower Bollinger Band
                 current_slope_value > 0 and current_momentum_value > 0,  # Positive slope and increasing momentum
             ])
 
-            if current_adx > 20:
+            if current_adx > 20 and current_ema9 > current_ema21 and current_macd > current_signal:
                 if buy_conditions_met >= 3:  # Buy if any three conditions are met
                     allocation_dict[ticker] += (buy_conditions_met / 6) * (3000 / len(self.tickers))  # Allocate dynamically based on conditions met
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
@@ -83,9 +82,8 @@ class TradingStrategy(Strategy):
 
             # Sell conditions (any two conditions met)
             sell_conditions_met = sum([
-                current_ema21 > current_ema9,
-                #current_ema21 > current_ema9 and current_rsi > 60,
-                #current_ema21 > current_ema9 and current_rsi < 45,
+                current_ema21 > current_ema9 and current_rsi > 60,
+                current_ema21 > current_ema9 and current_rsi < 45,
                 current_macd < current_signal and current_rsi > 70,  # RSI above 70 and MACD crosses below signal line
                 current_macd < current_signal and current_rsi < 45,  # MACD crosses below signal line and RSI < 45
                 current_close >= current_bb_upper and current_rsi > 70,  # Price above upper Bollinger Band and RSI > 70
@@ -93,7 +91,7 @@ class TradingStrategy(Strategy):
                 
             ])
 
-            if current_adx > 20: 
+            if current_adx > 20 and current_ema21 > current_ema9 and current_macd < current_signal: 
                 if sell_conditions_met >= 3:
                     if self.sell_condition_times[ticker] is None:
                         # Record the current time if this is the first occurrence
