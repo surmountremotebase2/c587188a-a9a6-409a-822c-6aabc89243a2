@@ -89,7 +89,7 @@ class TradingStrategy(Strategy):
 
             # Stop-loss based on ATR
             if self.holding_dict[ticker] > 0:
-                stop_loss_price = self.entry_prices[ticker] - (1.0 * current_atr)
+                stop_loss_price = self.entry_prices[ticker] - (1.2 * current_atr)
                 if current_close < stop_loss_price:
                     allocation_dict[ticker] = 0  # Liquidate the stock
                     self.holding_dict[ticker] = 0
