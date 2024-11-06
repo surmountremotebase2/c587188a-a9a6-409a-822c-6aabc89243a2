@@ -75,7 +75,7 @@ class TradingStrategy(Strategy):
             ])
 
             if current_adx > 20 and current_ema9 > current_ema21 and current_macd > current_signal:
-                if buy_conditions_met >= 3:  # Buy if any three conditions are met
+                if buy_conditions_met >= 2:  # Buy if any three conditions are met
                     allocation_dict[ticker] += (buy_conditions_met / 6) * (3000 / len(self.tickers))  # Allocate dynamically based on conditions met
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                     self.entry_prices[ticker] = current_close
@@ -92,7 +92,7 @@ class TradingStrategy(Strategy):
             ])
 
             if current_adx > 20 and current_ema21 > current_ema9 and current_macd < current_signal: 
-                if sell_conditions_met >= 3:
+                if sell_conditions_met >= 2:
                     if self.sell_condition_times[ticker] is None:
                         # Record the current time if this is the first occurrence
                         self.sell_condition_times[ticker] = current_time
