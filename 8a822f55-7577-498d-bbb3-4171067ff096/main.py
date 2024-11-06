@@ -70,7 +70,9 @@ class TradingStrategy(Strategy):
                 current_long_ma > current_short_ma and current_rsi < 45,  # Condition 1
                 current_signal > current_macd and current_momentum_value < 0,  # Condition 2
                 current_rsi > 60 and current_close >= current_bb_upper,  # Condition 3
-                current_momentum_value < 0 and current_rsi < 45  # Condition 4
+                current_momentum_value < 0 and current_rsi < 45,  # Condition 4
+                current_momentum_value < 0
+
             ])
 
             if sell_conditions_met >= 3:  # If 3 out of 4 sell conditions are met, liquidate
