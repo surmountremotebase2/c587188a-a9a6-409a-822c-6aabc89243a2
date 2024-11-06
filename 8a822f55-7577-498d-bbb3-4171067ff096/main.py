@@ -6,7 +6,7 @@ from .macd import MACD
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = [
-            "META","AAPL", "AMZN", "NFLX", "GOOG", "PYPL", "TSLA", "NVDA", "MSFT", "NVDA", "AMD"
+            "META","AAPL", "AMZN", "NFLX", "GOOG", "PYPL", "TSLA", "NVDA", "MSFT", "NVDA", "AMD", "SQ", "BIIB","AVGO", "QCOM", "MU"
             #"DIS", "HD", "WMT", "SQ", "BIIB","AVGO", "QCOM", "MU", "UNH", "SHOP", "AMGN"
             #"PEP", "XOM", "PYPL", "JPM", "PG", "LMT", "NOC", "CRM", "DHR", "NOW", "QQQ", "SPY", "IWM"
         ]
