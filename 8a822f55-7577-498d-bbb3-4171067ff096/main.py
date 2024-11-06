@@ -69,7 +69,7 @@ class TradingStrategy(Strategy):
 
             # Sell conditions (if 3 out of 4 conditions are met)
             sell_conditions_met = sum([
-                current_ema21 > current_ema9 and current_rsi > 60,  # EMA21 crosses above EMA9 and RSI < 45
+                current_ema21 > current_ema9 and current_rsi < 60,  # EMA21 crosses above EMA9 and RSI < 45
                 current_signal > current_macd and current_momentum_value < 0,  # Signal crosses above MACD and momentum is negative
                 current_rsi > 70 and current_close >= current_bb_upper,  # RSI > 60 and price touches/above upper Bollinger Band
                 current_momentum_value < 0,  # Momentum is negative
