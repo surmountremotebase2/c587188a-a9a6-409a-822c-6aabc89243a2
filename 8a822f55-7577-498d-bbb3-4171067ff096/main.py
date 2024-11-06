@@ -71,9 +71,9 @@ class TradingStrategy(Strategy):
                 current_macd > current_signal and current_rsi > 55,  # MACD crosses above signal line and RSI > 55
             ])
 
-            if (current_rsi < 30 or current_rsi > 55) and current_adx > 25:
+            if current_adx > 25:
                 if buy_conditions_met >= 4:  # Buy if any two conditions are met
-                    allocation_dict[ticker] += 0.3 * (2000 / len(self.tickers))  # Allocate 30% per condition met
+                    allocation_dict[ticker] += 1 * (2000 / len(self.tickers))  # Allocate 30% per condition met
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                     self.entry_prices[ticker] = current_close
 
