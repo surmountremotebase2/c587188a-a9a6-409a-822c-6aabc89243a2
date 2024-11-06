@@ -5,7 +5,7 @@ from .macd import MACD
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL", "AMZN"]  # You can add more tickers as needed
+        self.tickers = ["META","AAPL", "AMZN", "NFLX", "GOOGL", "TSLA", "NVDA", "MSFT", "AMD"]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
         self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for ATR-based stop loss
         self.sell_condition_times = {ticker: None for ticker in self.tickers}  # Track initial sell condition times
