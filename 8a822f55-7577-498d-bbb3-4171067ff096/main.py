@@ -87,7 +87,7 @@ class TradingStrategy(Strategy):
             else:
                 self.sell_condition_times[ticker] = None  # Reset if conditions are no longer met
 
-                        # Stop-loss based on ATR
+            # Stop-loss based on ATR
             if self.holding_dict[ticker] > 0:
                 stop_loss_price = self.entry_prices[ticker] - (1.1 * current_atr)  # ATR-based stop loss with adjusted multiplier
                 if current_close < stop_loss_price:
