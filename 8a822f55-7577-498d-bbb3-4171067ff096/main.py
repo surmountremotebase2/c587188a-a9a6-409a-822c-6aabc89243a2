@@ -74,7 +74,7 @@ class TradingStrategy(Strategy):
                 current_slope_value < 0,  # Slope is negative
                 current_momentum_value < 0,  # Momentum is negative
                 current_ema21 > current_ema9 and current_rsi < 35 and current_adx > 20,  # EMA21 crosses above EMA9 and RSI < 45
-                current_close >= current_bb_upper and  and current_adx > 20 and current_momentum_value < -5,
+                current_close >= current_bb_upper and current_adx > 20 and current_momentum_value < -5,
             ])
 
             if sell_conditions_met >= 2:
