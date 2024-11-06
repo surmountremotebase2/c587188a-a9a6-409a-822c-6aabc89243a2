@@ -5,7 +5,13 @@ from .macd import MACD
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["GOOGL", "AMZN"]
+        self.tickers = [
+            "QQQ", "SPY", "IWM",
+            "META","AAPL", "AMZN", "NFLX", "GOOGL", "DIS", "HD", "WMT", "COST",
+            "TSLA", "NVDA", "MSFT", "NVDA", "AMD", "AVGO", "QCOM", "MU",
+            "KO", "PEP", "XOM", "PYPL", "V", "JPM", "PG" , "LMT", "NOC"
+
+        ]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
         self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for ATR-based stop loss
         self.sell_condition_times = {ticker: None for ticker in self.tickers}  # Track initial sell condition times
