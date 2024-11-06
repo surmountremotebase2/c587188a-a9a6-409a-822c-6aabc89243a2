@@ -1,18 +1,12 @@
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope  # Removed Stochastic
 from .macd import MACD  # Ensure MACD function is correctly imported
-import time  # Import time to manage timestamps
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = [
-            #"QQQ", "SPY", "IWM", 
-            "META", "AAPL", "NFLX", "AMZN", "GOOGL", 
-            "NVDA", "AVGO", "AMD", "QCOM", "MU", "TSLA"
-            ] # 
+        self.tickers = ["AAPL", "NVDA", "GOOGL", "AMZN"]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
         self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for ATR-based stop loss
-        self.entry_times = {ticker: None for ticker in self.tickers}  # Track entry times
 
     @property
     def interval(self):
@@ -76,25 +70,21 @@ class TradingStrategy(Strategy):
                 if self.holding_dict[ticker] == 0:  # Only set entry price if not already holding
                     self.holding_dict[ticker] = allocation_dict[ticker] / current_close  # Update holding amount
                     self.entry_prices[ticker] = current_close  # Set the entry price
-                    self.entry_times[ticker] = time.time()  # Record entry time
                 else:
                     # If already holding, increase the amount held
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
 
-            # Check if we have held the position for at least 5 minutes (300 seconds)
-            if self.holding_dict[ticker] > 0 and (time.time() - self.entry_times[ticker]) >= 300:
-                # Exit conditions
-                if (
-                    (current_long_ma > current_short_ma and  # Long-term MA above short-term MA
-                    current_rsi > 60 and  # RSI above 60
-                    current_signal > current_macd and  # Signal line above MACD line
-                    current_slope_value < 0) or  # Slope is negative
-                    current_close >= current_bb_upper or  # Price touches or goes above upper Bollinger Band
-                    (current_momentum_value < 0 and current_rsi > 65)  # Momentum is negative and RSI above 65
-                ):
-                    allocation_dict[ticker] = 0  # Liquidate the stock
-                    self.holding_dict[ticker] = 0  # Reset holding amount
-                    self.entry_times[ticker] = None  # Reset entry time
+            # Exit conditions
+            if (
+                (current_long_ma > current_short_ma and  # Long-term MA above short-term MA
+                current_rsi > 60 and  # RSI above 60
+                current_signal > current_macd and  # Signal line above MACD line
+                current_slope_value < 0) or  # Slope is negative
+                current_close >= current_bb_upper or  # Price touches or goes above upper Bollinger Band
+                (current_momentum_value < 0 and current_rsi > 65)  # Momentum is negative and RSI above 65
+            ):
+                allocation_dict[ticker] = 0  # Liquidate the stock
+                self.holding_dict[ticker] = 0  # Reset holding amount
 
             # Stop-loss based on ATR
             if self.holding_dict[ticker] > 0:
@@ -102,7 +92,6 @@ class TradingStrategy(Strategy):
                 if current_close < stop_loss_price:
                     allocation_dict[ticker] = 0  # Liquidate the stock
                     self.holding_dict[ticker] = 0  # Reset holding amount
-                    self.entry_times[ticker] = None  # Reset entry time
 
         # Return the target allocation
         return TargetAllocation(allocation_dict)
