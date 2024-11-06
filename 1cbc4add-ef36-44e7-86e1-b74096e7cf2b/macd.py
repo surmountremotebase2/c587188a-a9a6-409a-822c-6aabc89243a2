@@ -1,7 +1,7 @@
 # macd.py
 import pandas as pd
 
-def MACD(close_prices, fast_period=12, slow_period=26, signal_period=9):
+def MACD(close_prices, fast_period=9, slow_period=21, signal_period=8):
     """
     Calculate the MACD line and signal line.
 
