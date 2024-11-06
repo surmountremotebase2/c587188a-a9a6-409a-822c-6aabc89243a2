@@ -60,7 +60,7 @@ class TradingStrategy(Strategy):
                 current_momentum_value > 0  # Condition 5
             ])
 
-            if buy_conditions_met >= 4:  # Buy if 3 out of 4 conditions are met
+            if buy_conditions_met >= 3:  # Buy if 3 out of 4 conditions are met
                 allocation_dict[ticker] += 0.3 * (2000 / len(self.tickers))  # Allocate 30% per condition met
                 self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                 self.entry_prices[ticker] = current_close
@@ -75,7 +75,7 @@ class TradingStrategy(Strategy):
 
             ])
 
-            if sell_conditions_met >= 4:  # If 3 out of 4 sell conditions are met, liquidate
+            if sell_conditions_met >= 3:  # If 3 out of 4 sell conditions are met, liquidate
                 allocation_dict[ticker] = 0  # Liquidate the stock
                 self.holding_dict[ticker] = 0
 
