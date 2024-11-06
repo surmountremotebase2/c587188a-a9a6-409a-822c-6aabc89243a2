@@ -64,7 +64,7 @@ class TradingStrategy(Strategy):
                 current_close <= current_bb_lower and current_adx > 20 and current_momentum_value > 5,
             ])
 
-            if buy_conditions_met >= 2:
+            if buy_conditions_met >= 3:
                 allocation_dict[ticker] += (buy_conditions_met / 4) * (3000 / len(self.tickers))
                 self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                 self.entry_prices[ticker] = current_close
@@ -74,10 +74,10 @@ class TradingStrategy(Strategy):
                 current_slope_value < 0,  # Slope is negative
                 current_momentum_value < 0,  # Momentum is negative
                 current_ema21 > current_ema9 and current_rsi < 35 and current_adx > 20,  # EMA21 crosses above EMA9 and RSI < 45
-                current_close >= current_bb_upper and current_adx > 20 and current_momentum_value < -5,
+                current_close >= current_bb_upper and current_adx > 20 and current_momentum_value < 0,
             ])
 
-            if sell_conditions_met >= 2:
+            if sell_conditions_met >= 3:
                 if self.sell_condition_times[ticker] is None:
                     # Record the current time if this is the first occurrence
                     self.sell_condition_times[ticker] = current_time
