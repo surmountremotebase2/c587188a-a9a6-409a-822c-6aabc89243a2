@@ -96,7 +96,7 @@ class TradingStrategy(Strategy):
                     if self.sell_condition_times[ticker] is None:
                         # Record the current time if this is the first occurrence
                         self.sell_condition_times[ticker] = current_time
-                    elif current_time >= self.sell_condition_times[ticker] + timedelta(minutes=15):
+                    elif current_time >= self.sell_condition_times[ticker] + timedelta(minutes=10):
                         # Check if 5 minutes have passed since the initial occurrence
                         allocation_dict[ticker] = 0  # Liquidate the stock
                         self.holding_dict[ticker] = 0
