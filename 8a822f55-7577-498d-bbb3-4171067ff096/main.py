@@ -66,12 +66,12 @@ class TradingStrategy(Strategy):
 
             # Buy conditions (any two conditions met)
             buy_conditions_met = sum([
-                current_ema9 > current_ema21 and current_rsi < 40,
-                current_ema9 > current_ema21 and current_rsi > 50,  # More aggressive bullish confirmation
-                current_macd > current_signal and current_rsi < 40,  # RSI below 30 and MACD crosses above signal line
-                current_macd > current_signal and current_rsi > 50,  # MACD crosses above signal line and RSI > 55
-                current_close <= current_bb_lower and current_rsi < 40,  # Price below lower Bollinger Band
-                current_slope_value > 0 and current_momentum_value > 0,  # Positive slope and increasing momentum
+                #current_ema9 > current_ema21 and current_rsi < 40,
+                current_ema9 > current_ema21 and current_rsi > 55,  # More aggressive bullish confirmation
+                #current_macd > current_signal and current_rsi < 40,  # RSI below 30 and MACD crosses above signal line
+                current_macd > current_signal and current_rsi > 55,  # MACD crosses above signal line and RSI > 55
+                current_close <= current_bb_lower and current_rsi > 50,  # Price below lower Bollinger Band
+                current_slope_value > 0 and current_momentum_value > 0 and RSI > 50,  # Positive slope and increasing momentum
             ])
 
             if current_adx > 20 and current_ema9 > current_ema21 and current_macd > current_signal:
