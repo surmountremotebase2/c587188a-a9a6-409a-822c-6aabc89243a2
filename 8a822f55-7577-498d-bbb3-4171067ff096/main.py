@@ -74,7 +74,7 @@ class TradingStrategy(Strategy):
                 current_slope_value > 0 and current_momentum_value > 0,  # Positive slope and increasing momentum
             ])
 
-            if current_adx > 24:
+            if current_adx > 20:
                 if buy_conditions_met >= 3:  # Buy if any three conditions are met
                     allocation_dict[ticker] += (buy_conditions_met / 6) * (3000 / len(self.tickers))  # Allocate dynamically based on conditions met
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
@@ -91,7 +91,7 @@ class TradingStrategy(Strategy):
                 
             ])
 
-            if current_adx > 24: 
+            if current_adx > 20: 
                 if sell_conditions_met >= 3:
                     if self.sell_condition_times[ticker] is None:
                         # Record the current time if this is the first occurrence
