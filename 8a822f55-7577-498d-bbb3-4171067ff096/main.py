@@ -76,7 +76,7 @@ class TradingStrategy(Strategy):
 
             if current_adx > 24:
                 if buy_conditions_met >= 3:  # Buy if any three conditions are met
-                    allocation_dict[ticker] += (buy_conditions_met / 6) * (4000 / len(self.tickers))  # Allocate dynamically based on conditions met
+                    allocation_dict[ticker] += (buy_conditions_met / 6) * (3000 / len(self.tickers))  # Allocate dynamically based on conditions met
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                     self.entry_prices[ticker] = current_close
 
