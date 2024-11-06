@@ -1,16 +1,18 @@
+from datetime import datetime, timedelta
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import SMA, RSI, BB, ATR, Momentum, Slope
 from .macd import MACD
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL", "GOOGL", "AMZN"]
+        self.tickers = ["AAPL", "NVDA", "GOOGL", "AMZN"]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}
         self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for ATR-based stop loss
+        self.sell_condition_times = {ticker: None for ticker in self.tickers}  # Track initial sell condition times
 
     @property
     def interval(self):
-        return "1hour"
+        return "1hour"  # Using 1-hour interval
 
     @property
     def assets(self):
@@ -19,6 +21,7 @@ class TradingStrategy(Strategy):
     def run(self, data):
         allocation_dict = {ticker: 0 for ticker in self.tickers}  # Initialize allocations to zero
         ohlcv = data.get("ohlcv")
+        current_time = datetime.now()
 
         for ticker in self.tickers:
             close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day]
@@ -51,13 +54,12 @@ class TradingStrategy(Strategy):
             current_momentum_value = momentum_values[-1]
             current_slope_value = slope_values[-1]
 
-            # Check Buy Conditions
+            # Buy conditions
             buy_conditions_met = sum([
-                current_slope_value > 0 and current_rsi > 55,  # Condition 1
-                current_short_ma > current_long_ma and current_rsi > 55,  # Condition 2
-                current_macd > current_signal and current_momentum_value > 0,  # Condition 3
-                current_rsi < 40 and current_close <= current_bb_lower,  # Condition 4
-                current_momentum_value > 0  # Condition 5
+                current_rsi < 30 and current_macd > current_signal,  # RSI below 30 and MACD crosses above signal line
+                current_close <= current_bb_lower and current_rsi < 30,  # Price below lower Bollinger Band and RSI < 30
+                current_slope_value > 0 and current_momentum_value > 0,  # Positive slope and increasing momentum
+                current_macd > current_signal and current_rsi > 55,  # MACD crosses above signal line and RSI > 55
             ])
 
             if buy_conditions_met >= 3:  # Buy if 3 out of 4 conditions are met
@@ -65,19 +67,25 @@ class TradingStrategy(Strategy):
                 self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                 self.entry_prices[ticker] = current_close
 
-            # Check Sell Conditions
+            # Sell conditions
             sell_conditions_met = sum([
-                current_long_ma > current_short_ma and current_rsi < 45,  # Condition 1
-                current_signal > current_macd and current_momentum_value < 0,  # Condition 2
-                current_rsi > 60 and current_close >= current_bb_upper,  # Condition 3
-                current_momentum_value < 0 and current_rsi < 45,  # Condition 4
-                current_momentum_value < 0
-
+                current_rsi > 70 and current_macd < current_signal,  # RSI above 70 and MACD crosses below signal line
+                current_close >= current_bb_upper and current_rsi > 70,  # Price above upper Bollinger Band and RSI > 70
+                current_slope_value < 0 and current_momentum_value < 0,  # Negative slope and weakening momentum
+                current_macd < current_signal and current_rsi < 45,  # MACD crosses below signal line and RSI < 45
             ])
 
-            if sell_conditions_met >= 3:  # If 3 out of 4 sell conditions are met, liquidate
-                allocation_dict[ticker] = 0  # Liquidate the stock
-                self.holding_dict[ticker] = 0
+            if sell_conditions_met >= 3:
+                if self.sell_condition_times[ticker] is None:
+                    # Record the current time if this is the first occurrence
+                    self.sell_condition_times[ticker] = current_time
+                elif current_time >= self.sell_condition_times[ticker] + timedelta(minutes=5):
+                    # Check if 5 minutes have passed since the initial occurrence
+                    allocation_dict[ticker] = 0  # Liquidate the stock
+                    self.holding_dict[ticker] = 0
+                    self.sell_condition_times[ticker] = None  # Reset the timer
+            else:
+                self.sell_condition_times[ticker] = None  # Reset if conditions are no longer met
 
             # Stop-loss based on ATR
             if self.holding_dict[ticker] > 0:
