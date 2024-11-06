@@ -59,7 +59,7 @@ class TradingStrategy(Strategy):
                 current_ema9 > current_ema21 and current_rsi < 60,  # EMA9 crosses above EMA21 and RSI > 55
             ])
 
-            if buy_conditions_met >= 3:
+            if buy_conditions_met >= 2:
                 allocation_dict[ticker] += (buy_conditions_met / 4) * (3000 / len(self.tickers))
                 self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                 self.entry_prices[ticker] = current_close
@@ -71,7 +71,7 @@ class TradingStrategy(Strategy):
                 current_ema21 > current_ema9 and current_rsi < 40,  # EMA21 crosses above EMA9 and RSI < 45
             ])
 
-            if sell_conditions_met >= 3:
+            if sell_conditions_met >= 2:
                 if self.sell_condition_times[ticker] is None:
                     # Record the current time if this is the first occurrence
                     self.sell_condition_times[ticker] = current_time
