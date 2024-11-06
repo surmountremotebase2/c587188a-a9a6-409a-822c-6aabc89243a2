@@ -87,7 +87,7 @@ class TradingStrategy(Strategy):
                 #current_macd < current_signal and current_rsi > 70,  # RSI above 70 and MACD crosses below signal line
                 current_macd < current_signal and current_rsi < 40,  # MACD crosses below signal line and RSI < 45
                 current_close >= current_bb_upper and current_rsi > 70,  # Price above upper Bollinger Band and RSI > 70
-                current_slope_value < 0 and current_momentum_value < 0 and and RSI < 45,  # Negative slope and weakening momentum
+                current_slope_value < 0 and current_momentum_value < 0 and RSI < 45,  # Negative slope and weakening momentum
                 
             ])
 
