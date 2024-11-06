@@ -16,7 +16,7 @@ class TradingStrategy(Strategy):
 
     @property
     def interval(self):
-        return "1day  # Using 1-hour interval
+        return "1hour"  # Using 1-hour interval
 
     @property
     def assets(self):
@@ -96,7 +96,7 @@ class TradingStrategy(Strategy):
                     if self.sell_condition_times[ticker] is None:
                         # Record the current time if this is the first occurrence
                         self.sell_condition_times[ticker] = current_time
-                    elif current_time >= self.sell_condition_times[ticker] + timedelta(minutes=10):
+                    elif current_time >= self.sell_condition_times[ticker] + timedelta(minutes=5):
                         # Check if 5 minutes have passed since the initial occurrence
                         allocation_dict[ticker] = 0  # Liquidate the stock
                         self.holding_dict[ticker] = 0
