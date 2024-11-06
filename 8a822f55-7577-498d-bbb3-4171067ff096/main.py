@@ -70,7 +70,7 @@ class TradingStrategy(Strategy):
             sell_conditions_met = sum([
                 current_slope_value < 0,  # Slope is negative
                 current_momentum_value < 0,  # Momentum is negative
-                current_ema21 > current_ema9 and current_rsi < 40,  # EMA21 crosses above EMA9 and RSI < 45
+                current_ema21 > current_ema9 and current_rsi < 35,  # EMA21 crosses above EMA9 and RSI < 45
             ])
 
             if sell_conditions_met >= 2:
