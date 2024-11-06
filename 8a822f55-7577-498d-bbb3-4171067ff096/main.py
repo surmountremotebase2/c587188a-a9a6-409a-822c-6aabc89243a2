@@ -54,20 +54,20 @@ class TradingStrategy(Strategy):
             current_momentum_value = momentum_values[-1]
             current_slope_value = slope_values[-1]
 
-            # Buy conditions
+            # Buy conditions (any two conditions met)
             buy_conditions_met = sum([
                 current_rsi < 30 and current_macd > current_signal,  # RSI below 30 and MACD crosses above signal line
-                current_close <= current_bb_lower and current_rsi < 30,  # Price below lower Bollinger Band and RSI < 30
+                current_close <= current_bb_lower and current_rsi < 35,  # Price below lower Bollinger Band and RSI < 30
                 current_slope_value > 0 and current_momentum_value > 0,  # Positive slope and increasing momentum
                 current_macd > current_signal and current_rsi > 55,  # MACD crosses above signal line and RSI > 55
             ])
 
-            if buy_conditions_met >= 3:  # Buy if 3 out of 4 conditions are met
+            if buy_conditions_met >= 2:  # Buy if any two conditions are met
                 allocation_dict[ticker] += 0.3 * (2000 / len(self.tickers))  # Allocate 30% per condition met
                 self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                 self.entry_prices[ticker] = current_close
 
-            # Sell conditions
+            # Sell conditions (any two conditions met)
             sell_conditions_met = sum([
                 current_rsi > 70 and current_macd < current_signal,  # RSI above 70 and MACD crosses below signal line
                 current_close >= current_bb_upper and current_rsi > 70,  # Price above upper Bollinger Band and RSI > 70
@@ -75,7 +75,7 @@ class TradingStrategy(Strategy):
                 current_macd < current_signal and current_rsi < 45,  # MACD crosses below signal line and RSI < 45
             ])
 
-            if sell_conditions_met >= 3:
+            if sell_conditions_met >= 2:
                 if self.sell_condition_times[ticker] is None:
                     # Record the current time if this is the first occurrence
                     self.sell_condition_times[ticker] = current_time
