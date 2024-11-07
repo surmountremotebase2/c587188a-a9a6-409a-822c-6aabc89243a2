@@ -60,7 +60,7 @@ class TradingStrategy(Strategy):
             ])
 
             if buy_conditions_met >= 1:
-                allocation_dict[ticker] += (buy_conditions_met / 2) * (3000 / len(self.tickers))
+                allocation_dict[ticker] += (buy_conditions_met / 2) * (2000 / len(self.tickers))
                 self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                 self.entry_prices[ticker] = current_close
 
@@ -82,7 +82,7 @@ class TradingStrategy(Strategy):
 
             # Stop-loss based on ATR and ADX
             if self.holding_dict[ticker] > 0:
-                stop_loss_price = self.entry_prices[ticker] - (1.1 * current_atr)
+                stop_loss_price = self.entry_prices[ticker] - (1.05 * current_atr)
                 if current_close < stop_loss_price:
                     allocation_dict[ticker] = 0
                     self.holding_dict[ticker] = 0
