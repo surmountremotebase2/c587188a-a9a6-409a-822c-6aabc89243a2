@@ -1,97 +1,100 @@
-from datetime import datetime, timedelta
+# main.py
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import EMA, MACD, BB, RSI, ADX, ATR, CCI
+from surmount.technical_indicators import EMA, MACD, ADX, ATR, CCI, BollingerBands, RSI, MFI
+from surmount.logging import log
 
 class TradingStrategy(Strategy):
     def __init__(self):
+        # Define the tickers of interest
         self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
-        self.holding_dict = {ticker: 0 for ticker in self.tickers}
-        self.entry_prices = {ticker: 0 for ticker in self.tickers}
-        self.sell_condition_times = {ticker: None for ticker in self.tickers}
-
-    @property
-    def interval(self):
-        return "1hour"
+        self.initial_investment = 2000
+        self.invested_amount = 0
+        self.positions = {ticker: {"amount": 0.0, "entry_price": 0.0, "stop_loss": 0.0} for ticker in self.tickers}
 
     @property
     def assets(self):
+        # Return all tickers
         return self.tickers
 
+    @property
+    def interval(self):
+        # Set 1-hour interval
+        return "1hour"
+
     def run(self, data):
-        allocation_dict = {ticker: 0 for ticker in self.tickers}
-        ohlcv = data.get("ohlcv")
-        current_time = datetime.now()
+        allocation = {ticker: 0.0 for ticker in self.tickers}
 
         for ticker in self.tickers:
-            try:
-                # Ensure we have valid data for the current ticker
-                close_prices = [day[ticker]['close'] for day in ohlcv if ticker in day and 'close' in day[ticker]]
-                if len(close_prices) < 26:
-                    continue
-
-                # Calculate indicators with close_prices or ticker-specific ohlcv data
-                ema9 = EMA(ticker, ohlcv, 9)
-                ema21 = EMA(ticker, ohlcv, 21)
-                rsi = RSI(ticker, ohlcv, 14)
-                macd_line, signal_line = MACD(close_prices, 12, 26, 9)
-                bb_data = BB(ticker, ohlcv, 20, 2)
-                adx = ADX(ticker, ohlcv, 14)
-                atr = ATR(ticker, ohlcv, 14)
-                cci = CCI(ticker, ohlcv, 14)
-
-                # Ensure indicators have values
-                if any(len(x) < 1 for x in [ema9, ema21, rsi, macd_line, signal_line, adx, atr, cci]):
-                    continue
-
-                # Retrieve current indicator values
-                current_ema9 = ema9[-1]
-                current_ema21 = ema21[-1]
-                current_rsi = rsi[-1]
-                current_macd = macd_line[-1]
-                current_signal = signal_line[-1]
-                current_close = close_prices[-1]
-                current_bb_lower = bb_data['lower'][-1]
-                current_bb_upper = bb_data['upper'][-1]
-                current_adx = adx[-1]
-                current_atr = atr[-1]
-                current_cci = cci[-1]
-
-                # Buy conditions
-                buy_conditions_met = sum([
-                    current_macd > current_signal and current_ema21 > current_ema9 and current_rsi > 65 and current_adx > 60 and current_cci > 100 and current_atr > 0.6,
-                    current_close < current_bb_lower and current_rsi < 30 and current_adx > 60 and current_cci < -100
-                ])
-
-                if buy_conditions_met >= 1:
-                    allocation_dict[ticker] = (3000 / len(self.tickers))  # Allocate equally among tickers
-                    self.holding_dict[ticker] += allocation_dict[ticker] / current_close
-                    self.entry_prices[ticker] = current_close
-
-                # Sell conditions
-                sell_conditions_met = sum([
-                    current_signal > current_macd and current_ema9 > current_ema21 and current_rsi < 35 and current_cci < -100 and current_atr > 0.6 and current_adx > 60,
-                    current_close > current_bb_upper and current_rsi > 70 and (current_atr > 0.7 and current_adx > 70) and (current_atr > 0.75 or current_adx > 75) and current_cci > 100
-                ])
-
-                if sell_conditions_met >= 1:
-                    if self.sell_condition_times[ticker] is None:
-                        self.sell_condition_times[ticker] = current_time
-                    elif current_time >= self.sell_condition_times[ticker] + timedelta(minutes=5):
-                        allocation_dict[ticker] = 0  # Liquidate
-                        self.holding_dict[ticker] = 0
-                        self.sell_condition_times[ticker] = None  # Reset timer
-                else:
-                    self.sell_condition_times[ticker] = None  # Reset if conditions are not met
-
-                # Stop-loss condition based on ATR and ADX
-                if self.holding_dict[ticker] > 0:
-                    stop_loss_price = self.entry_prices[ticker] - (1.0 * current_atr)
-                    if current_close < stop_loss_price and current_adx > 25:
-                        allocation_dict[ticker] = 0  # Liquidate position
-                        self.holding_dict[ticker] = 0
-
-            except TypeError as e:
-                print(f"Data error for {ticker}: {e}")
+            ohlcv = data["ohlcv"][ticker]
+            if len(ohlcv) < 26:  # Ensure minimum data length for indicators
                 continue
 
-        return TargetAllocation(allocation_dict)
+            # Calculate indicators
+            ema9 = EMA(ticker, ohlcv, length=9)
+            ema21 = EMA(ticker, ohlcv, length=21)
+            macd, signal = MACD(ticker, ohlcv, 12, 26, 9)
+            adx = ADX(ticker, ohlcv, 14)
+            atr = ATR(ticker, ohlcv, 14)
+            cci = CCI(ticker, ohlcv, 14)
+            bb = BollingerBands(ticker, ohlcv, 20, 2)
+            rsi = RSI(ticker, ohlcv, 14)
+            mfi = MFI(ticker, ohlcv, 14)
+
+            # Fetch latest values
+            last_price = ohlcv[-1]["close"]
+            last_ema9 = ema9[-1]
+            last_ema21 = ema21[-1]
+            last_macd = macd[-1]
+            last_signal = signal[-1]
+            last_adx = adx[-1]
+            last_atr = atr[-1]
+            last_cci = cci[-1]
+            last_bb_lower = bb["lower"][-1]
+            last_bb_upper = bb["upper"][-1]
+            last_rsi = rsi[-1]
+            last_mfi = mfi[-1]
+
+            # Determine buy condition
+            buy_condition = (
+                (last_macd > last_signal and last_ema21 > last_ema9 and (last_rsi > 65 or last_mfi < 20) and last_adx > 60 and last_cci > 100 and last_atr > 0.6 and last_mfi < 20)
+                or (last_price < last_bb_lower and last_rsi < 30 and last_adx > 60 and last_cci < -100)
+            )
+
+            # Determine sell condition
+            sell_condition = (
+                (last_signal > last_macd and last_ema9 > last_ema21 and (last_rsi < 35 or last_mfi > 80) and last_cci < -100 and last_atr > 0.6 and last_adx > 60)
+                or (last_price > last_bb_upper and last_rsi > 70 and (last_atr > 0.7 and last_adx > 70) and (last_atr > 0.75 or last_adx > 75) and last_cci > 100)
+            )
+
+            # Check for existing positions and apply stop loss
+            if self.positions[ticker]["amount"] > 0:
+                entry_price = self.positions[ticker]["entry_price"]
+                stop_loss = self.positions[ticker]["stop_loss"]
+                # If price hits the stop loss, sell the position
+                if last_price <= stop_loss:
+                    allocation[ticker] = 0.0  # Sell all holdings
+                    self.invested_amount -= self.positions[ticker]["amount"] * entry_price
+                    self.positions[ticker] = {"amount": 0.0, "entry_price": 0.0, "stop_loss": 0.0}
+                    log(f"Stop Loss Triggered for {ticker}: Current Price {last_price}, Stop Loss {stop_loss}, Liquidating position.")
+
+            # Implement buying or selling based on conditions
+            if buy_condition and self.positions[ticker]["amount"] == 0.0:  # Only buy if not holding
+                available_funds = self.initial_investment - self.invested_amount
+                proportion = 1 / len(self.tickers)
+                investment_per_stock = available_funds * proportion
+                allocation[ticker] = min(1.0, investment_per_stock / last_price)
+                self.invested_amount += investment_per_stock
+
+                # Set the stop loss based on ATR
+                stop_loss = last_price - (2 * last_atr)  # Example: stop loss at 2x ATR below entry price
+                self.positions[ticker] = {"amount": allocation[ticker], "entry_price": last_price, "stop_loss": stop_loss}
+
+                log(f"Buying {ticker}: Current Price {last_price}, Allocation {allocation[ticker]}, Stop Loss {stop_loss}")
+
+            elif sell_condition and self.positions[ticker]["amount"] > 0.0:  # Only sell if holding
+                allocation[ticker] = 0.0  # Sell all holdings
+                self.invested_amount -= self.positions[ticker]["amount"] * last_price
+                self.positions[ticker] = {"amount": 0.0, "entry_price": 0.0, "stop_loss": 0.0}
+                log(f"Selling {ticker}: Current Price {last_price}, Liquidating all holdings.")
+
+        return TargetAllocation(allocation)
