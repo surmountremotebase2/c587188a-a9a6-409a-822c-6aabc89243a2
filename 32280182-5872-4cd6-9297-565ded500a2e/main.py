@@ -60,7 +60,7 @@ class TradingStrategy(Strategy):
 
                 # Buy conditions
                 buy_conditions_met = sum([
-                    current_macd > current_signal and current_ema21 > current_ema9 and current_rsi > 65 and current_adx > 60 and current_cci > 100 and current_atr > 0.6 and current_mfi < 20,
+                    current_macd > current_signal and current_rsi > 65 and current_adx > 60 and current_cci > 100 and current_atr > 0.6 and current_mfi < 20, #and current_ema21 > current_ema9
                     current_close < current_bb_lower and current_rsi < 30 and current_adx > 60 and current_cci < -100
                 ])
 
@@ -71,7 +71,7 @@ class TradingStrategy(Strategy):
 
                 # Sell conditions
                 sell_conditions_met = sum([
-                    current_signal > current_macd and current_ema9 > current_ema21 and current_rsi < 35 and current_cci < -100 and current_atr > 0.6 and current_adx > 60,
+                    current_signal > current_macd and current_rsi < 35 and current_cci < -100 and current_atr > 0.6 and current_adx > 60, #and current_ema9 > current_ema21
                     current_close > current_bb_upper and current_rsi > 70 and (current_atr > 0.7 and current_adx > 70) and (current_atr > 0.75 or current_adx > 75) and current_cci > 100
                 ])
 
