@@ -1,6 +1,6 @@
 # main.py
 from surmount.base_class import Strategy, TargetAllocation
-from surmount.technical_indicators import EMA, MACD, ADX, ATR, CCI, BollingerBands, RSI, MFI
+from surmount.technical_indicators import EMA, MACD, ADX, ATR, CCI, RSI, MFI
 from surmount.logging import log
 
 class TradingStrategy(Strategy):
@@ -36,9 +36,13 @@ class TradingStrategy(Strategy):
             adx = ADX(ticker, ohlcv, 14)
             atr = ATR(ticker, ohlcv, 14)
             cci = CCI(ticker, ohlcv, 14)
-            bb = BollingerBands(ticker, ohlcv, 20, 2)
             rsi = RSI(ticker, ohlcv, 14)
             mfi = MFI(ticker, ohlcv, 14)
+
+            # Manually calculate Bollinger Bands
+            bollinger_bands = calculate_bollinger_bands([x["close"] for x in ohlcv], window=20, num_std_dev=2)
+            last_bb_lower = bollinger_bands["lower"][-1]
+            last_bb_upper = bollinger_bands["upper"][-1]
 
             # Fetch latest values
             last_price = ohlcv[-1]["close"]
@@ -49,8 +53,6 @@ class TradingStrategy(Strategy):
             last_adx = adx[-1]
             last_atr = atr[-1]
             last_cci = cci[-1]
-            last_bb_lower = bb["lower"][-1]
-            last_bb_upper = bb["upper"][-1]
             last_rsi = rsi[-1]
             last_mfi = mfi[-1]
 
