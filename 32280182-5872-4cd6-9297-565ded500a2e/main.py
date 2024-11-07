@@ -32,13 +32,13 @@ class TradingStrategy(Strategy):
                 # Calculate indicators with close_prices or ticker-specific ohlcv data
                 ema9 = EMA(ticker, ohlcv, 9)
                 ema21 = EMA(ticker, ohlcv, 21)
-                rsi = RSI(ticker, ohlcv, 14)
-                macd_line, signal_line = MACD(close_prices, 12, 26, 9)
+                rsi = RSI(ticker, ohlcv, 7)
+                macd_line, signal_line = MACD(close_prices, 6, 13, 5)
                 bb_data = BB(ticker, ohlcv, 20, 2)
-                adx = ADX(ticker, ohlcv, 14)
-                atr = ATR(ticker, ohlcv, 14)
-                cci = CCI(ticker, ohlcv, 14)
-                mfi = MFI(ticker, ohlcv, 14)
+                adx = ADX(ticker, ohlcv, 7)
+                atr = ATR(ticker, ohlcv, 7)
+                cci = CCI(ticker, ohlcv, 7)
+                mfi = MFI(ticker, ohlcv, 7)
 
                 # Ensure indicators have values
                 if any(len(x) < 1 for x in [ema9, ema21, rsi, macd_line, signal_line, adx, atr, cci, mfi]):
