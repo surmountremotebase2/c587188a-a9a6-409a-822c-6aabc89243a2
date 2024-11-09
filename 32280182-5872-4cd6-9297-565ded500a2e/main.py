@@ -54,7 +54,7 @@ class TradingStrategy(Strategy):
 
                 # Buy Conditions
                 if macd_line and signal_line:
-                    if previous_signal > previous_macd and current_macd > current_signal and (current_macd - current_signal) > 0 and current_rsi < 35 and current_mfi < 20 and current_adx > 40 and current_cci < -150:  # Buy condition 1
+                    if previous_signal > previous_macd and current_macd > current_signal and (current_macd - current_signal) < 0 and current_rsi < 40 and current_mfi < 20 and current_adx > 40 and current_cci < 0:  # Buy condition 1
                         allocation_dict[ticker] = 1/9  # Allocate 1/9 of capital for each stock
                         log(f"Buy signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
@@ -76,7 +76,7 @@ class TradingStrategy(Strategy):
 
                 # Sell Conditions
                 if macd_line and signal_line:
-                    if (current_signal > current_macd) and (previous_macd > previous_signal) and (current_signal - current_macd) < 0 and current_rsi > 65:  # Sell condition 1
+                    if (current_signal > current_macd) and (previous_macd > previous_signal) and (current_signal - current_macd) > 0 and current_rsi > 60 and current_mfi > 60 and current_adx > 40 and current_cci > 0:  # Sell condition 1
                         allocation_dict[ticker] = 0.0  # Sell the position
                         log(f"Sell signal for {ticker}: Signal > MACD: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
