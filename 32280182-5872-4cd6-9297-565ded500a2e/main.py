@@ -52,21 +52,21 @@ class TradingStrategy(Strategy):
 
                 # Buy Conditions
                 if macd_line and signal_line:
-                    if current_macd > current_signal:  # Buy condition 1
+                    if previous_signal > previous_macd and current_macd > current_signal and (current_macd - current_signal) < 0 and current_rsi < 35 and current_mfi < 20 and current_adx > 40 and current_cci < -150:  # Buy condition 1
                         allocation_dict[ticker] = 1/9  # Allocate 1/9 of capital for each stock
                         log(f"Buy signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif (current_ema21 > current_ema9) and current_rsi < 35:  # Buy condition 2
-                        allocation_dict[ticker] = 1/9
-                        log(f"Buy signal for {ticker}: current_ema21 > current_ema9) and current_rsi < 35 : EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+                    #elif (current_ema21 > current_ema9) and current_rsi < 35:  # Buy condition 2
+                        #allocation_dict[ticker] = 1/9
+                        #log(f"Buy signal for {ticker}: current_ema21 > current_ema9) and current_rsi < 35 : EMA9={current_ema9}, EMA21={current_ema21}, RSI=#{current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif (current_rsi > 65 or current_mfi < 20):  # Buy condition 3
-                        allocation_dict[ticker] = 1/9
-                        log(f"Buy signal for {ticker}: RSI > 65 or MFI < 20: RSI={current_rsi}, MFI={current_mfi}, EMA9={current_ema9}, EMA21={current_ema21}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+                    #elif (current_rsi > 65 or current_mfi < 20):  # Buy condition 3
+                        #allocation_dict[ticker] = 1/9
+                        #log(f"Buy signal for {ticker}: RSI > 65 or MFI < 20: RSI={current_rsi}, MFI={current_mfi}, EMA9={current_ema9}, EMA21={current_ema21}, #ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif current_adx > 60 and current_cci > 100 and current_atr > 0.6:  # Buy condition 4
-                        allocation_dict[ticker] = 1/9
-                        log(f"Buy signal for {ticker}: ADX > 60, CCI > 100, ATR > 0.6: ADX={current_adx}, CCI={current_cci}, ATR={current_atr}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}")
+                    #elif current_adx > 60 and current_cci > 100 and current_atr > 0.6:  # Buy condition 4
+                        #allocation_dict[ticker] = 1/9
+                        #log(f"Buy signal for {ticker}: ADX > 60, CCI > 100, ATR > 0.6: ADX={current_adx}, CCI={current_cci}, ATR={current_atr}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}")
 
                     elif bb_lower and current_close < bb_lower and current_rsi < 30:  # Buy condition 5
                         allocation_dict[ticker] = 1/9
@@ -74,21 +74,21 @@ class TradingStrategy(Strategy):
 
                 # Sell Conditions
                 if macd_line and signal_line:
-                    if current_signal > current_macd and (current_ema9 < current_ema21 or abs(current_ema9 - current_ema21)):  # Sell condition 1
+                    if (current_signal > current_macd) and (previous_macd > previous_signal) and (current_signal - current_signal) > 0 and current_rsi > 65):  # Sell condition 1
                         allocation_dict[ticker] = 0.0  # Sell the position
                         log(f"Sell signal for {ticker}: Signal > MACD: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif (current_ema9 > current_ema21) and current_mfi < 34:  # Sell condition 2
-                        allocation_dict[ticker] = 0.0
-                        log(f"Sell signal for {ticker}: EMA9 > EMA21 by more than 1: EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+                    #elif (current_ema9 > current_ema21) and current_mfi < 34:  # Sell condition 2
+                        #allocation_dict[ticker] = 0.0
+                        #log(f"Sell signal for {ticker}: EMA9 > EMA21 by more than 1: EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif (current_rsi < 35 or current_mfi > 80):  # Sell condition 3
-                        allocation_dict[ticker] = 0.0
-                        log(f"Sell signal for {ticker}: RSI < 35 or MFI > 80: RSI={current_rsi}, MFI={current_mfi}, EMA9={current_ema9}, EMA21={current_ema21}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+                    #elif (current_rsi < 35 or current_mfi > 80):  # Sell condition 3
+                        #allocation_dict[ticker] = 0.0
+                        #log(f"Sell signal for {ticker}: RSI < 35 or MFI > 80: RSI={current_rsi}, MFI={current_mfi}, EMA9={current_ema9}, EMA21={current_ema21}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif current_cci < -100:  # Sell condition 4
-                        allocation_dict[ticker] = 0.0
-                        log(f"Sell signal for {ticker}: CCI < -100: CCI={current_cci}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, ATR={current_atr}")
+                    #elif current_cci < -100:  # Sell condition 4
+                        #allocation_dict[ticker] = 0.0
+                        #log(f"Sell signal for {ticker}: CCI < -100: CCI={current_cci}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, ATR={current_atr}")
 
                     elif bb_upper and current_close > bb_upper and current_rsi > 70 and (current_atr > 0.7 or current_adx > 70):  # Sell condition 5
                         allocation_dict[ticker] = 0.0
