@@ -67,7 +67,7 @@ class TradingStrategy(Strategy):
                             self.entry_prices[ticker] = current_close  # Track entry price for stop-loss
                             log(f"Buy signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif current_rsi < 30:
+                    elif current_rsi < 25:
                         capital_per_ticker = self.account_balance / len(self.tickers) * 0.7
                         if self.account_balance >= capital_per_ticker:  # Ensure enough funds to buy
                             allocation_dict[ticker] = capital_per_ticker / current_close  # Allocate capital per share
@@ -90,7 +90,7 @@ class TradingStrategy(Strategy):
                         self.account_balance += self.holding_dict[ticker] * current_close  # Add funds back to account balance
                         log(f"Sell signal for {ticker}: Signal > MACD: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif current_rsi > 70:
+                    elif current_rsi > 68:
                         allocation_dict[ticker] = 0.0
                         self.account_balance += self.holding_dict[ticker] * current_close  # Add funds back to account balance
                         log(f"Sell signal for {ticker}: Price above BB upper band, RSI > 70, ATR > 0.7 or ADX > 70: Close={current_close}, BB Upper={bb_upper}, RSI={current_rsi}, ATR={current_atr}, ADX={current_adx}, EMA9={current_ema9}, EMA21={current_ema21}, MFI={current_mfi}")
