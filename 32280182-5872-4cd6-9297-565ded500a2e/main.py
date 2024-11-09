@@ -6,8 +6,8 @@ from surmount.logging import log
 class TradingStrategy(Strategy):
     def __init__(self, initial_investment=2000):
         self.tickers = [
-            "AAPL", "AMZN", "META", "NFLX", "GOOG", "TSLA", "NVDA", "MSFT", "AMD", "SQ", "AVGO", "QCOM", "MU", "PYPL",
-            "DIS", "HD", "WMT", "BIIB", "UNH", "SHOP", "AMGN", "PEP", "XOM", "JPM", "PG", "LMT", "NOC", "CRM", "DHR", "NOW", "QQQ", "SPY", "IWM"
+            "NVDA", #"AAPL", "AMZN", "META", "NFLX", "GOOG", "TSLA", "MSFT", "AMD", "SQ", "AVGO", "QCOM", "MU", "PYPL",
+            #"DIS", "HD", "WMT", "BIIB", "UNH", "SHOP", "AMGN", "PEP", "XOM", "JPM", "PG", "LMT", "NOC", "CRM", "DHR", "NOW", "QQQ", "SPY", "IWM"
         ]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}  # Track positions
         self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for stop-loss
@@ -15,7 +15,7 @@ class TradingStrategy(Strategy):
 
     @property
     def interval(self):
-        return "1hour"  # 1-hour interval as specified
+        return "5mins"  # 1-hour interval as specified
 
     @property
     def assets(self):
