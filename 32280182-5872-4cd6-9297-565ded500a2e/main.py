@@ -40,6 +40,8 @@ class TradingStrategy(Strategy):
                 # Get current indicator values
                 current_macd = macd_line[-1] if macd_line else None
                 current_signal = signal_line[-1] if signal_line else None
+                previous_macd = macd_line[-2] if macd_line else None
+                previous_signal = signal_line[-2] if signal_line else None
                 current_ema9 = ema9[-1] if ema9 else None
                 current_ema21 = ema21[-1] if ema21 else None
                 current_rsi = rsi[-1] if rsi else None
