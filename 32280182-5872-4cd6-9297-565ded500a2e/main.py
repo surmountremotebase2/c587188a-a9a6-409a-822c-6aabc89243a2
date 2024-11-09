@@ -96,8 +96,8 @@ class TradingStrategy(Strategy):
                         allocation_dict[ticker] = 0.0
                         log(f"Sell signal for {ticker}: Price above BB upper band, RSI > 70, ATR > 0.7 or ADX > 70: Close={current_close}, BB Upper={bb_upper}, RSI={current_rsi}, ATR={current_atr}, ADX={current_adx}, EMA9={current_ema9}, EMA21={current_ema21}")
 
-                # Stop-loss condition: Liquidate if current price drops more than 1 ATR from entry
-                if self.holding_dict[ticker] > 0:
+                 # Stop-loss condition: Liquidate if current price drops more than 1 ATR from entry, only if you own the stock
+                if self.holding_dict[ticker] > 0:  # Check if you own the stock
                     entry_price = self.holding_dict[ticker]  # You should track entry price when buying
                     if current_close < entry_price - current_atr:
                         allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
