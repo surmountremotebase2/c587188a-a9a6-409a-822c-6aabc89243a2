@@ -6,6 +6,7 @@ from surmount.logging import log
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.holding_dict = {ticker: 0 for ticker in self.tickers}  # Initialize holding_dict to track positions
     
     @property
     def interval(self):
@@ -56,7 +57,7 @@ class TradingStrategy(Strategy):
                         log(f"Buy signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
                     elif (current_ema21 - current_ema9) > 1:  # Buy condition 2
-                        allocation_dict[ticker] = 1/9 
+                        allocation_dict[ticker] = 1/9
                         log(f"Buy signal for {ticker}: EMA21 > EMA9 by more than 1: EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
                     elif (current_rsi > 65 or current_mfi < 20):  # Buy condition 3
@@ -93,12 +94,10 @@ class TradingStrategy(Strategy):
                         allocation_dict[ticker] = 0.0
                         log(f"Sell signal for {ticker}: Price above BB upper band, RSI > 70, ATR > 0.7 or ADX > 70: Close={current_close}, BB Upper={bb_upper}, RSI={current_rsi}, ATR={current_atr}, ADX={current_adx}, EMA9={current_ema9}, EMA21={current_ema21}")
 
-
-# Stop-loss condition: Liquidate if current price drops more than 1 ATR from entry
-            if holding_dict[ticker] > 0 and current_close < (holding_dict[ticker] * current_close - current_atr):
-                allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
-                holding_dict[ticker] = 0  # Reset holding amount
-
+                # Stop-loss condition: Liquidate if current price drops more than 1 ATR from entry
+                if self.holding_dict[ticker] > 0 and current_close < (self.holding_dict[ticker] * current_close - current_atr):
+                    allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
+                    self.holding_dict[ticker] = 0  # Reset holding amount
 
         # Return target allocation to be used by the strategy
         return TargetAllocation(allocation_dict)
