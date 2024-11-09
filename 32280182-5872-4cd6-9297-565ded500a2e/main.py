@@ -56,7 +56,7 @@ class TradingStrategy(Strategy):
 
             # Buy conditions
             buy_conditions_met = sum([
-                current_rsi < 30 and current_macd > current_signal,  # RSI below 30 and MACD crosses above signal line
+                current_rsi < 30 and current_macd < current_signal,  # RSI below 30 and MACD crosses above signal line
                 #current_close <= current_bb_lower and current_rsi < 30,  # Price below lower Bollinger Band and RSI < 30
                 #current_slope_value > 0 and current_momentum_value > 0,  # Positive slope and increasing momentum
                 #current_macd > current_signal and current_rsi > 55,  # MACD crosses above signal line and RSI > 55
