@@ -66,6 +66,13 @@ class TradingStrategy(Strategy):
                 allocation_dict[ticker] += 0.3 * (2000 / len(self.tickers))  # Allocate 30% per condition met
                 self.holding_dict[ticker] += allocation_dict[ticker] / current_close
                 self.entry_prices[ticker] = current_close
+                print(f"\n--- BUY Signal for {ticker} ---")
+                print(f"MACD: {current_macd}, Signal Line: {current_signal}")
+                print(f"EMA9: {current_ema9}, EMA21: {current_ema21}, RSI: {current_rsi}")
+                print(f"ADX: {current_adx}, ATR: {current_atr}, CCI: {current_cci}, MFI: {current_mfi}")
+                print(f"BB Lower: {current_bb_lower}, BB Upper: {current_bb_upper}")
+                print(f"Close Price: {current_close}")
+                print("Buy Conditions Met:", buy_conditions_met)
 
             # Sell conditions
             sell_conditions_met = sum([
@@ -84,6 +91,13 @@ class TradingStrategy(Strategy):
                     allocation_dict[ticker] = 0  # Liquidate the stock
                     self.holding_dict[ticker] = 0
                     self.sell_condition_times[ticker] = None  # Reset the timer
+                    print(f"\n--- SELL Signal for {ticker} ---")
+                    print(f"MACD: {current_macd}, Signal Line: {current_signal}")
+                    print(f"EMA9: {current_ema9}, EMA21: {current_ema21}, RSI: {current_rsi}")
+                    print(f"ADX: {current_adx}, ATR: {current_atr}, CCI: {current_cci}, MFI: {current_mfi}")
+                    print(f"BB Lower: {current_bb_lower}, BB Upper: {current_bb_upper}")
+                    print(f"Close Price: {current_close}")
+                    print("Sell Conditions Met:", sell_conditions_met)
             else:
                 self.sell_condition_times[ticker] = None  # Reset if conditions are no longer met
 
@@ -93,6 +107,10 @@ class TradingStrategy(Strategy):
                 if current_close < stop_loss_price:
                     allocation_dict[ticker] = 0  # Liquidate the stock
                     self.holding_dict[ticker] = 0
+                    print(f"\n--- STOP-LOSS Triggered for {ticker} ---")
+                    print(f"Stop-loss Price: {stop_loss_price}, Current Price: {current_close}")
+                    print(f"Entry Price: {self.entry_prices[ticker]}, ATR: {current_atr}, ADX: {current_adx}")
+
 
         # Return the target allocation
         return TargetAllocation(allocation_dict)
