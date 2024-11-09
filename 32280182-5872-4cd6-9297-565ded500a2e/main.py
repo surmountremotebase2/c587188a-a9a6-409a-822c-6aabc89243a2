@@ -60,6 +60,30 @@ class TradingStrategy(Strategy):
                     bb_lower and current_close < bb_lower and current_rsi < 30 and current_cci < -100  # Price below BB lower band, RSI < 30, CCI < -100
                 ]
 
+
+                # Buy Conditions
+                if macd_line and signal_line:
+                    if (current_macd > current_signal and current_ema21 - current_ema9) > 1):  # Buy condition 1
+                        current_allocation = 1/9  # Allocate 1/9 of capital for each stock
+                        log(f"Buy signal current_macd > current_signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+
+                    elif ((current_ema21 > current_ema9) > and current_rsi > 65):
+                        current_allocation = 1/9 
+                        log(f"Buy signal current_ema21 > current_ema9 for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+
+                    elif (current_rsi > 65 or current_mfi < 20)):  # Buy condition 2
+                        current_allocation = 1/9
+                        log(f"Buy signal current_rsi > 65 or current_mfi < 20 for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+
+                    elif (current_adx > 60) and (current_cci > 100) and (current_atr > 0.6):  # Buy condition 3
+                        current_allocation = 1/9
+                        log(f"Buy signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+
+                    elif (bb_lower and current_close < bb_lower and current_rsi < 30):  # Buy condition 4
+                        current_allocation = 1/9
+                        log(f"Buy signal bb_lower and current_close < bb_lower and current_rsi < 30 for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+
+
                 # Sell Conditions
                 sell_conditions = [
                     current_signal > current_macd,                         # Signal line crosses above MACD line
