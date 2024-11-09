@@ -5,7 +5,11 @@ from surmount.logging import log
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.tickers = [
+            "AAPL", "AMZN", "META", "NFLX", "GOOG", "TSLA", "NVDA", "MSFT", "AMD", "SQ","AVGO", "QCOM", "MU", "PYPL"
+            "DIS", "HD", "WMT", "SQ", "BIIB","AVGO", "QCOM", "MU", "UNH", "SHOP", "AMGN"
+            "PEP", "XOM", "PYPL", "JPM", "PG", "LMT", "NOC", "CRM", "DHR", "NOW", "QQQ", "SPY", "IWM"
+            ]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}  # Initialize holding_dict to track positions
         self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Initialize entry prices for stop-loss tracking
     
