@@ -20,12 +20,19 @@ class TradingStrategy(Strategy):
         allocation_dict = {}
         for ticker in self.tickers:
             # Calculate technical indicators for each ticker
-            rsi = RSI(ticker, data["ohlcv"], length=14)
-            ema = EMA(ticker, data["ohlcv"], length=20)
-            sma = SMA(ticker, data["ohlcv"], length=50)
-            bb = BB(ticker, data["ohlcv"], length=20, std=2)  # Standard deviation for BBs
-            atr = ATR(ticker, data["ohlcv"], length=14)
+            ohlcv = data.get("ohlcv", {}).get(ticker, [])
             
+            # Make sure that we have the OHLCV data for the ticker
+            if not ohlcv:
+                log(f"No OHLCV data available for {ticker}")
+                continue
+            
+            rsi = RSI(ticker, ohlcv, length=14)
+            ema = EMA(ticker, ohlcv, length=20)
+            sma = SMA(ticker, ohlcv, length=50)
+            bb = BB(ticker, ohlcv, length=20, std=2)  # Standard deviation for BBs
+            atr = ATR(ticker, ohlcv, length=14)
+
             # Log the last values for each indicator to inspect their output
             log(f"{ticker} RSI: {rsi[-1] if rsi else 'N/A'}, EMA: {ema[-1] if ema else 'N/A'}, SMA: {sma[-1] if sma else 'N/A'}, BB Lower: {bb['lower'][-1] if bb else 'N/A'}, BB Upper: {bb['upper'][-1] if bb else 'N/A'}, ATR: {atr[-1] if atr else 'N/A'}")
             
