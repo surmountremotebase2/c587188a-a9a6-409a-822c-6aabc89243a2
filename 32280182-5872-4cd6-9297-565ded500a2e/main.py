@@ -57,18 +57,19 @@ class TradingStrategy(Strategy):
                 current_cci = cci[-1]
                 current_mfi = mfi[-1]
 
+                # Print indicator values before evaluating conditions
+                print(f"\n--- Evaluating Conditions for {ticker} ---")
+                print(f"MACD: {current_macd}, Signal Line: {current_signal}")
+                print(f"EMA9: {current_ema9}, EMA21: {current_ema21}")
+                print(f"RSI: {current_rsi}, ADX: {current_adx}, ATR: {current_atr}, CCI: {current_cci}, MFI: {current_mfi}")
+                print(f"BB Lower: {current_bb_lower}, BB Upper: {current_bb_upper}")
+                print(f"Close Price: {current_close}")
+
                 # Buy conditions
                 buy_conditions_met = sum([
                     current_macd > current_signal and abs(current_ema21 - current_ema9) > 1 and current_rsi > 65 and current_adx > 60 and current_cci > 100 and current_atr > 0.6 and current_mfi < 20,
                     current_close < current_bb_lower and current_rsi < 30 and current_adx > 60 and current_cci < -100
                 ])
-
-                print(f"\n--- Precondition Signal for {ticker} ---")
-                print(f"MACD: {current_macd}, Signal Line: {current_signal}")
-                print(f"EMA9: {current_ema9}, EMA21: {current_ema21}, RSI: {current_rsi}")
-                print(f"ADX: {current_adx}, ATR: {current_atr}, CCI: {current_cci}, MFI: {current_mfi}")
-                print(f"BB Lower: {current_bb_lower}, BB Upper: {current_bb_upper}")
-                print(f"Close Price: {current_close}")
 
                 if buy_conditions_met >= 1:
                     allocation_dict[ticker] = (3000 / len(self.tickers))
@@ -76,12 +77,7 @@ class TradingStrategy(Strategy):
                     self.entry_prices[ticker] = current_close
                     # Print settings and indicators on Buy
                     print(f"\n--- BUY Signal for {ticker} ---")
-                    print(f"MACD: {current_macd}, Signal Line: {current_signal}")
-                    print(f"EMA9: {current_ema9}, EMA21: {current_ema21}, RSI: {current_rsi}")
-                    print(f"ADX: {current_adx}, ATR: {current_atr}, CCI: {current_cci}, MFI: {current_mfi}")
-                    print(f"BB Lower: {current_bb_lower}, BB Upper: {current_bb_upper}")
-                    print(f"Close Price: {current_close}")
-                    print("Buy Conditions Met:", buy_conditions_met)
+                    print(f"Buy Conditions Met:", buy_conditions_met)
 
                 # Sell conditions
                 sell_conditions_met = sum([
@@ -98,12 +94,7 @@ class TradingStrategy(Strategy):
                         self.sell_condition_times[ticker] = None
                         # Print settings and indicators on Sell
                         print(f"\n--- SELL Signal for {ticker} ---")
-                        print(f"MACD: {current_macd}, Signal Line: {current_signal}")
-                        print(f"EMA9: {current_ema9}, EMA21: {current_ema21}, RSI: {current_rsi}")
-                        print(f"ADX: {current_adx}, ATR: {current_atr}, CCI: {current_cci}, MFI: {current_mfi}")
-                        print(f"BB Lower: {current_bb_lower}, BB Upper: {current_bb_upper}")
-                        print(f"Close Price: {current_close}")
-                        print("Sell Conditions Met:", sell_conditions_met)
+                        print(f"Sell Conditions Met:", sell_conditions_met)
                 else:
                     self.sell_condition_times[ticker] = None
 
@@ -118,3 +109,7 @@ class TradingStrategy(Strategy):
                         print(f"Entry Price: {self.entry_prices[ticker]}, ATR: {current_atr}, ADX: {current_adx}")
 
             except TypeError as e:
+                print(f"Data error for {ticker}: {e}")
+                pass  # Placeholder for the except block
+
+        return TargetAllocation(allocation_dict)
