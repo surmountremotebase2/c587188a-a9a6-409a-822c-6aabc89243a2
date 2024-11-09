@@ -84,7 +84,7 @@ class TradingStrategy(Strategy):
                             log(f"Buy signal for {ticker}: Price below BB lower band, RSI < 30: Close={current_close}, BB Lower={bb_lower}, RSI={current_rsi}, EMA9={current_ema9}, EMA21={current_ema21}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
                 # Sell Conditions
-                if macd_line and signal_line and self.holding_dict[ticker] > 0:
+                if self.holding_dict[ticker] > 0:
                     if current_signal > current_macd and previous_macd > previous_signal and current_rsi > 55:
                         allocation_dict[ticker] = 0.0  # Sell the position
                         self.account_balance += self.holding_dict[ticker] * current_close  # Add funds back to account balance
