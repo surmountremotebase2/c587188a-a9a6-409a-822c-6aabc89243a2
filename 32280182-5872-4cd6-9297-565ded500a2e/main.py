@@ -1,6 +1,6 @@
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import EMA, RSI, ATR, ADX, CCI, BB, MFI  # Import necessary indicators
-from .macd import MACD  # Ensure macd.py contains MACD function and is in the same directory or package
+from macd import MACD  # Ensure macd.py contains MACD function and is in the same directory or package
 from surmount.logging import log
 
 class TradingStrategy(Strategy):
@@ -30,7 +30,13 @@ class TradingStrategy(Strategy):
                 adx = ADX(ticker, data["ohlcv"], length=14)
                 cci = CCI(ticker, data["ohlcv"], length=14)
                 mfi = MFI(ticker, data["ohlcv"], length=14)
-                bb_lower, bb_upper = BB(ticker, data["ohlcv"], length=20, std_dev=2)
+
+                # Adjust BB call here based on available arguments
+                bb_values = BB(ticker, data["ohlcv"], length=20)  # Assuming BB returns both lower and upper bands
+                if bb_values and len(bb_values[-1]) == 2:
+                    bb_lower, bb_upper = bb_values[-1]
+                else:
+                    bb_lower, bb_upper = None, None
 
                 # Retrieve the latest values for each indicator
                 current_close = close_prices[-1]
@@ -43,8 +49,6 @@ class TradingStrategy(Strategy):
                 current_adx = adx[-1] if adx else None
                 current_cci = cci[-1] if cci else None
                 current_mfi = mfi[-1] if mfi else None
-                current_bb_lower = bb_lower[-1] if bb_lower else None
-                current_bb_upper = bb_upper[-1] if bb_upper else None
 
                 # Buy conditions
                 buy_conditions = [
@@ -54,7 +58,7 @@ class TradingStrategy(Strategy):
                     current_adx > 60,                                      # ADX > 60
                     current_cci > 100,                                     # CCI > 100
                     current_atr > 0.6,                                     # ATR > 0.6
-                    current_close < current_bb_lower and current_rsi < 30 and current_cci < -100  # Price below BB lower band, RSI < 30, CCI < -100
+                    bb_lower and current_close < bb_lower and current_rsi < 30 and current_cci < -100  # Price below BB lower band, RSI < 30, CCI < -100
                 ]
 
                 # Sell conditions
@@ -65,7 +69,7 @@ class TradingStrategy(Strategy):
                     current_cci < -100,                                    # CCI < -100
                     current_atr > 0.6,                                     # ATR > 0.6
                     current_adx > 60,                                      # ADX > 60
-                    current_close > current_bb_upper and current_rsi > 70 and (current_atr > 0.7 or current_adx > 70)  # Price above BB upper band, RSI > 70, and either ATR > 0.7 or ADX > 70
+                    bb_upper and current_close > bb_upper and current_rsi > 70 and (current_atr > 0.7 or current_adx > 70)  # Price above BB upper band, RSI > 70, and either ATR > 0.7 or ADX > 70
                 ]
 
                 # Allocate based on buy/sell conditions
