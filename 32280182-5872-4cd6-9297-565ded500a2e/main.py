@@ -78,14 +78,16 @@ class TradingStrategy(Strategy):
                 sell_conditions_met = sum([1 for condition in sell_conditions if condition])
 
                 # Check if 2 or more buy conditions are met
-                if buy_conditions_met >= 2:
+                if buy_conditions_met >= 1:
                     allocation_dict[ticker] = 1/9  # Allocate 1/9 of capital for each stock
                     log(f"Buying {ticker} based on {buy_conditions_met} buy conditions met")
+                    log(f"Buy signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
                 # Check if 2 or more sell conditions are met
-                elif sell_conditions_met >= 2:
+                elif sell_conditions_met >= 1:
                     allocation_dict[ticker] = 0.0  # Sell the position
                     log(f"Selling {ticker} based on {sell_conditions_met} sell conditions met")
+                     log(f"Sell signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
                 # Stop-loss condition example (based on ATR)
                 stop_loss_trigger = False
