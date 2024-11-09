@@ -85,7 +85,7 @@ class TradingStrategy(Strategy):
 
                 # Sell Conditions
                 if macd_line and signal_line and self.holding_dict[ticker] > 0:
-                    if (current_signal > current_macd) and (previous_macd > previous_signal): and current_rsi > 55:
+                    if current_signal > current_macd and previous_macd > previous_signal and current_rsi > 55:
                         allocation_dict[ticker] = 0.0  # Sell the position
                         self.account_balance += self.holding_dict[ticker] * current_close  # Add funds back to account balance
                         log(f"Sell signal for {ticker}: Signal > MACD: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
