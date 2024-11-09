@@ -68,7 +68,7 @@ class TradingStrategy(Strategy):
                         #allocation_dict[ticker] = 1/9
                         #log(f"Buy signal for {ticker}: ADX > 60, CCI > 100, ATR > 0.6: ADX={current_adx}, CCI={current_cci}, ATR={current_atr}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}")
 
-                    elif bb_lower and current_close < bb_lower and current_rsi < 30:  # Buy condition 5
+                    elif bb_lower and current_close < bb_lower and current_rsi < 35 and current_mfi < 20 and current_adx > 40 and current_cci < -150:  # Buy condition 5
                         allocation_dict[ticker] = 1/9
                         log(f"Buy signal for {ticker}: Price below BB lower band, RSI < 30: Close={current_close}, BB Lower={bb_lower}, RSI={current_rsi}, EMA9={current_ema9}, EMA21={current_ema21}")
 
@@ -90,7 +90,7 @@ class TradingStrategy(Strategy):
                         #allocation_dict[ticker] = 0.0
                         #log(f"Sell signal for {ticker}: CCI < -100: CCI={current_cci}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, ATR={current_atr}")
 
-                    elif bb_upper and current_close > bb_upper and current_rsi > 70 and (current_atr > 0.7 or current_adx > 70):  # Sell condition 5
+                    elif bb_upper and current_close > bb_upper and current_rsi > 65 and current_mfi > 70 and current_adx > 40 and current_cci > 150:  # Sell condition 5
                         allocation_dict[ticker] = 0.0
                         log(f"Sell signal for {ticker}: Price above BB upper band, RSI > 70, ATR > 0.7 or ADX > 70: Close={current_close}, BB Upper={bb_upper}, RSI={current_rsi}, ATR={current_atr}, ADX={current_adx}, EMA9={current_ema9}, EMA21={current_ema21}")
 
