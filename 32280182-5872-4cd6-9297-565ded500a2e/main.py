@@ -68,7 +68,7 @@ class TradingStrategy(Strategy):
                             self.holding_dict[ticker] += allocation_dict[ticker]
                             log(f"Buy signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif bb_lower and current_close < bb_lower and current_rsi < 70 and current_adx > 45:
+                    elif bb_lower and current_close < bb_lower and current_rsi < 30 and current_adx > 45:
                         investment_per_stock = self.account_balance / len(self.tickers)
                         if investment_per_stock <= self.account_balance:
                             allocation_dict[ticker] = investment_per_stock / current_close
@@ -85,7 +85,7 @@ class TradingStrategy(Strategy):
                         log(f"Sell signal for {ticker}: Signal > MACD: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
                         self.holding_dict[ticker] = 0  # Reset holding
 
-                    elif bb_upper and current_close > bb_upper and current_rsi > 70 and current_adx > 45:
+                    elif bb_upper and current_close > bb_upper and current_rsi > 80 and current_adx > 45:
                         allocation_dict[ticker] = 0.0
                         self.account_balance += self.holding_dict[ticker] * current_close
                         log(f"Sell signal for {ticker}: Price above BB upper band, RSI > 70, ATR > 0.7 or ADX > 70: Close={current_close}, BB Upper={bb_upper}, RSI={current_rsi}, ATR={current_atr}, ADX={current_adx}, EMA9={current_ema9}, EMA21={current_ema21}")
