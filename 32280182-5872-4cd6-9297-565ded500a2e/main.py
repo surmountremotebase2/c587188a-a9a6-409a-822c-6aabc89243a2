@@ -73,11 +73,11 @@ class TradingStrategy(Strategy):
                             allocation_dict[ticker] = capital_per_ticker / current_close  # Allocate capital per share
                             self.account_balance -= capital_per_ticker  # Deduct from available capital
                             self.entry_prices[ticker] = current_close  # Track entry price for stop-loss
-                            log(f"Buy signal for {ticker}: Price below BB lower band, RSI < 30: Close={current_close}, BB Lower={bb_lower}, RSI={current_rsi}, EMA9={current_ema9}, EMA21={current_ema21}")
+                            log(f"Buy signal for {ticker}: Price below BB lower band, RSI < 30: Close={current_close}, BB Lower={bb_lower}, RSI={current_rsi}, EMA9={current_ema9}, EMA21={current_ema21}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
                 # Sell Conditions
                 if macd_line and signal_line and self.holding_dict[ticker] > 0:
-                    if (current_signal > current_macd) and (previous_macd > previous_signal) and current_rsi > 55:
+                    if (current_signal > current_macd) and (previous_macd > previous_signal):# and current_rsi > 55:
                         allocation_dict[ticker] = 0.0  # Sell the position
                         self.account_balance += self.holding_dict[ticker] * current_close  # Add funds back to account balance
                         log(f"Sell signal for {ticker}: Signal > MACD: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
@@ -85,7 +85,7 @@ class TradingStrategy(Strategy):
                     elif bb_upper and current_close > bb_upper and current_rsi > 70 and current_adx > 45:
                         allocation_dict[ticker] = 0.0
                         self.account_balance += self.holding_dict[ticker] * current_close  # Add funds back to account balance
-                        log(f"Sell signal for {ticker}: Price above BB upper band, RSI > 70, ATR > 0.7 or ADX > 70: Close={current_close}, BB Upper={bb_upper}, RSI={current_rsi}, ATR={current_atr}, ADX={current_adx}, EMA9={current_ema9}, EMA21={current_ema21}")
+                        log(f"Sell signal for {ticker}: Price above BB upper band, RSI > 70, ATR > 0.7 or ADX > 70: Close={current_close}, BB Upper={bb_upper}, RSI={current_rsi}, ATR={current_atr}, ADX={current_adx}, EMA9={current_ema9}, EMA21={current_ema21}, MFI={current_mfi}")
 
                     # Stop-loss condition: Liquidate if price drops below entry price by 1 ATR
                     if current_close < self.entry_prices[ticker] - current_atr:
