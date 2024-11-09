@@ -5,7 +5,7 @@ from surmount.logging import log
 class TradingStrategy(Strategy):
     def __init__(self):
         self.tickers = ["AAPL", "TSLA", "META"]
-        # No need to include OHLCV data in data_list explicitly, it's automatically included
+        # The data should now be a list of dicts, each containing OHLCV for the tickers
 
     @property
     def interval(self):
@@ -18,15 +18,17 @@ class TradingStrategy(Strategy):
 
     def run(self, data):
         allocation_dict = {}
+        
         for ticker in self.tickers:
-            # Calculate technical indicators for each ticker
-            ohlcv = data.get("ohlcv", {}).get(ticker, [])
+            # Iterate through the list of data to extract the relevant OHLCV data for each ticker
+            ohlcv = next((entry["ohlcv"] for entry in data if entry["symbol"] == ticker), None)
             
             # Make sure that we have the OHLCV data for the ticker
-            if not ohlcv:
+            if ohlcv is None:
                 log(f"No OHLCV data available for {ticker}")
                 continue
-            
+
+            # Calculate technical indicators for each ticker
             rsi = RSI(ticker, ohlcv, length=14)
             ema = EMA(ticker, ohlcv, length=20)
             sma = SMA(ticker, ohlcv, length=50)
