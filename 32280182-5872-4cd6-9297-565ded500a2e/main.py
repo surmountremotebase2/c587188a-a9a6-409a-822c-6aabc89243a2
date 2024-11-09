@@ -1,6 +1,6 @@
 from surmount.base_class import Strategy, TargetAllocation
 from surmount.technical_indicators import EMA, ADX, ATR, CCI, BB, MFI, RSI
-from macd import MACD  # Import custom MACD from macd.py
+from .macd import MACD  # Import custom MACD from macd.py
 from surmount.logging import log
 
 class TradingStrategy(Strategy):
