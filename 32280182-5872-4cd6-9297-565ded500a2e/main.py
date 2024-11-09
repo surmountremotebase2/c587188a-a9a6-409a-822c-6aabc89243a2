@@ -4,10 +4,9 @@ from surmount.logging import log
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        # Define the stocks we're interested in
         self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
-        self.holdings = {ticker: 0 for ticker in self.tickers}  # Tracks position in each stock
-        self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Tracks entry price for stop-loss
+        self.holdings = {ticker: 0 for ticker in self.tickers}
+        self.entry_prices = {ticker: 0 for ticker in self.tickers}
     
     @property
     def assets(self):
@@ -21,13 +20,18 @@ class TradingStrategy(Strategy):
         allocation = {ticker: 0.0 for ticker in self.tickers}
 
         for ticker in self.tickers:
-            if len(data["ohlcv"]) < 14:  # Check if we have enough data for indicator calculations
+            # Ensure data contains sufficient entries
+            if len(data["ohlcv"]) < 26:
                 continue
-            
-            # Calculate indicators for the ticker
+
+            # Prepare close prices as a list of recent values for the ticker
+            close_prices = [entry[ticker]["close"] for entry in data["ohlcv"] if ticker in entry]
+
+            # Calculate indicators
             ema9 = EMA(ticker, data["ohlcv"], 9)
             ema21 = EMA(ticker, data["ohlcv"], 21)
-            macd_line, signal_line = MACD([entry[ticker]["close"] for entry in data["ohlcv"]], 12, 26, 9)
+            macd_result = MACD(close_prices, 12, 26, 9) if len(close_prices) >= 26 else (None, None)
+            macd_line, signal_line = macd_result
             bb_data = BB(ticker, data["ohlcv"], 20, 2)
             rsi = RSI(ticker, data["ohlcv"], 14)
             adx = ADX(ticker, data["ohlcv"], 14)
@@ -35,7 +39,7 @@ class TradingStrategy(Strategy):
             cci = CCI(ticker, data["ohlcv"], 14)
             mfi = MFI(ticker, data["ohlcv"], 14)
             
-            # Retrieve the most recent indicator values and close price
+            # Get the latest indicator values and price
             last_close = data["ohlcv"][-1][ticker]["close"]
             last_ema9 = ema9[-1] if ema9 else None
             last_ema21 = ema21[-1] if ema21 else None
@@ -49,7 +53,7 @@ class TradingStrategy(Strategy):
             last_cci = cci[-1] if cci else None
             last_mfi = mfi[-1] if mfi else None
 
-            # Print indicator values for logging and debug purposes
+            # Log values for debugging
             log(f"\nEvaluating {ticker}: Close={last_close}, EMA9={last_ema9}, EMA21={last_ema21}, "
                 f"MACD={last_macd}, Signal={last_signal}, BB Lower={last_bb_lower}, BB Upper={last_bb_upper}, "
                 f"RSI={last_rsi}, ADX={last_adx}, ATR={last_atr}, CCI={last_cci}, MFI={last_mfi}")
