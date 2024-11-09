@@ -17,9 +17,6 @@ class TradingStrategy(Strategy):
 
     def run(self, data):
         allocation_dict = {}
-
-        # Log the data structure for debugging purposes
-        log(f"Data structure: {data}")
         
         for ticker in self.tickers:
             # Ensure that data is in the expected format and access it accordingly
