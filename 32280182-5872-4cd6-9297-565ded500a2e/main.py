@@ -5,7 +5,7 @@ from surmount.logging import log
 
 class TradingStrategy(Strategy):
     def __init__(self):
-        self.tickers = ["AAPL", "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
+        self.tickers = ["AAPL"]#, "MSFT", "NVDA", "AMD", "META", "AMZN", "GOOGL", "NFLX", "TSLA"]
         self.holding_dict = {ticker: 0 for ticker in self.tickers}  # Initialize holding_dict to track positions
     
     @property
@@ -56,9 +56,9 @@ class TradingStrategy(Strategy):
                         allocation_dict[ticker] = 1/9  # Allocate 1/9 of capital for each stock
                         log(f"Buy signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif (current_ema21 - current_ema9) > 1:  # Buy condition 2
+                    elif (current_ema21 > current_ema9) and current_rsi < 35:  # Buy condition 2
                         allocation_dict[ticker] = 1/9
-                        log(f"Buy signal for {ticker}: EMA21 > EMA9 by more than 1: EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+                        log(f"Buy signal for {ticker}: current_ema21 > current_ema9) and current_rsi < 35 : EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
                     elif (current_rsi > 65 or current_mfi < 20):  # Buy condition 3
                         allocation_dict[ticker] = 1/9
@@ -74,11 +74,11 @@ class TradingStrategy(Strategy):
 
                 # Sell Conditions
                 if macd_line and signal_line:
-                    if current_signal > current_macd:  # Sell condition 1
+                    if current_signal > current_macd and (current_ema9 < current_ema21 or abs(current_ema9 - current_ema21)):  # Sell condition 1
                         allocation_dict[ticker] = 0.0  # Sell the position
                         log(f"Sell signal for {ticker}: Signal > MACD: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
-                    elif (current_ema9 - current_ema21) > 1:  # Sell condition 2
+                    elif (current_ema9 > current_ema21) and current_mfi < 34:  # Sell condition 2
                         allocation_dict[ticker] = 0.0
                         log(f"Sell signal for {ticker}: EMA9 > EMA21 by more than 1: EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
