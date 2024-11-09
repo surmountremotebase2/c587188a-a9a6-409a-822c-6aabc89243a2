@@ -87,7 +87,7 @@ class TradingStrategy(Strategy):
                 elif sell_conditions_met >= 1:
                     allocation_dict[ticker] = 0.0  # Sell the position
                     log(f"Selling {ticker} based on {sell_conditions_met} sell conditions met")
-                     log(f"Sell signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
+                    log(f"Sell signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
 
                 # Stop-loss condition example (based on ATR)
                 stop_loss_trigger = False
