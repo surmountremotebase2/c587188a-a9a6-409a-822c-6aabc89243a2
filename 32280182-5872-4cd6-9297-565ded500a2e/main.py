@@ -63,6 +63,13 @@ class TradingStrategy(Strategy):
                     current_close < current_bb_lower and current_rsi < 30 and current_adx > 60 and current_cci < -100
                 ])
 
+                print(f"\n--- Precondition Signal for {ticker} ---")
+                print(f"MACD: {current_macd}, Signal Line: {current_signal}")
+                print(f"EMA9: {current_ema9}, EMA21: {current_ema21}, RSI: {current_rsi}")
+                print(f"ADX: {current_adx}, ATR: {current_atr}, CCI: {current_cci}, MFI: {current_mfi}")
+                print(f"BB Lower: {current_bb_lower}, BB Upper: {current_bb_upper}")
+                print(f"Close Price: {current_close}")
+
                 if buy_conditions_met >= 1:
                     allocation_dict[ticker] = (3000 / len(self.tickers))
                     self.holding_dict[ticker] += allocation_dict[ticker] / current_close
