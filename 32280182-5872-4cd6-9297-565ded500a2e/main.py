@@ -97,9 +97,12 @@ class TradingStrategy(Strategy):
                         log(f"Sell signal for {ticker}: Price above BB upper band, RSI > 70, ATR > 0.7 or ADX > 70: Close={current_close}, BB Upper={bb_upper}, RSI={current_rsi}, ATR={current_atr}, ADX={current_adx}, EMA9={current_ema9}, EMA21={current_ema21}")
 
                 # Stop-loss condition: Liquidate if current price drops more than 1 ATR from entry
-                if self.holding_dict[ticker] > 0 and current_close < (self.holding_dict[ticker] * current_close - current_atr):
-                    allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
-                    self.holding_dict[ticker] = 0  # Reset holding amount
+                if self.holding_dict[ticker] > 0:
+                    entry_price = self.holding_dict[ticker]  # You should track entry price when buying
+                    if current_close < entry_price - current_atr:
+                        allocation_dict[ticker] = 0  # Liquidate stock due to stop-loss
+                        self.holding_dict[ticker] = 0  # Reset holding amount
+                        log(f"Stop-loss triggered for {ticker}: Close={current_close}, ATR={current_atr}")
 
         # Return target allocation to be used by the strategy
         return TargetAllocation(allocation_dict)
