@@ -19,7 +19,7 @@ class TradingStrategy(Strategy):
     def run(self, data):
         allocation_dict = {ticker: 0 for ticker in self.tickers}
         ohlcv = data.get("ohlcv")
-        partial_allocation = 0.3 * (1 / len(self.tickers))  # 0.3 of 1/len(self.tickers)
+        partial_allocation = 0.33 * (1 / len(self.tickers))  # 0.3 of 1/len(self.tickers)
         
         # Calculate allocation amount per ticker
         per_ticker_investment = self.initial_investment * partial_allocation
