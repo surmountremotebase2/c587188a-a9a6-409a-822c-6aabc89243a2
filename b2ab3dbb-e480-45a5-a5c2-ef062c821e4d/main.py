@@ -23,7 +23,7 @@ class TradingStrategy(Strategy):
         for ticker in self.tickers:
             try:
                 # Calculate RSI
-                rsi = RSI(ticker, ohlcv, length=4)[-1]
+                rsi = RSI(ticker, ohlcv, length=10)[-1]
 
                 # Check buy condition: RSI(4) greater than 65
                 if rsi > 65:
