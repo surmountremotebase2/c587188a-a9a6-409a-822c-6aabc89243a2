@@ -30,7 +30,7 @@ class TradingStrategy(Strategy):
                 rsi = RSI(ticker, ohlcv, length=9)[-1]
 
                 # Check buy condition: RSI(9) > 65
-                if rsi > 70:
+                if rsi > 65:
                     # Ensure sufficient funds are available before buying
                     if self.available_funds >= per_ticker_investment:
                         allocation_dict[ticker] += partial_allocation
@@ -38,7 +38,7 @@ class TradingStrategy(Strategy):
                         self.available_funds -= per_ticker_investment
 
                 # Check liquidation condition: RSI(9) < 30
-                elif rsi < 30:
+                elif rsi < 35:
                     # Liquidate all holdings for the ticker
                     allocation_dict[ticker] = 0
                     # Reset available funds if selling out of positions
