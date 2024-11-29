@@ -9,9 +9,6 @@ class TradingStrategy(Strategy):
             "NVDA", #"AAPL", "AMZN", "META", "NFLX", "GOOG", "TSLA", "MSFT", "AMD", "SQ", "AVGO", "QCOM", "MU", "PYPL",
             #"DIS", "HD", "WMT", "BIIB", "UNH", "SHOP", "AMGN", "PEP", "XOM", "JPM", "PG", "LMT", "NOC", "CRM", "DHR", "NOW", "QQQ", "SPY", "IWM"
         ]
-        self.holding_dict = {ticker: 0 for ticker in self.tickers}  # Track positions
-        self.entry_prices = {ticker: 0 for ticker in self.tickers}  # Track entry prices for stop-loss
-        self.account_balance = initial_investment  # Track available funds
 
     @property
     def interval(self):
@@ -57,46 +54,8 @@ class TradingStrategy(Strategy):
                 bb_lower = bb["lower"][-1] if bb and "lower" in bb else None
                 bb_upper = bb["upper"][-1] if bb and "upper" in bb else None
 
-                # Buy Conditions
-                if macd_line and signal_line:
-                    if previous_signal > previous_macd and current_macd > current_signal and current_rsi < 45:
-                        investment_per_stock = self.account_balance / len(self.tickers)
-                        if investment_per_stock <= self.account_balance:
-                            allocation_dict[ticker] = investment_per_stock / current_close  # Buy shares based on available funds
-                            self.account_balance -= investment_per_stock  # Deduct the amount used for buying
-                            self.entry_prices[ticker] = current_close  # Track entry price for stop-loss
-                            self.holding_dict[ticker] += allocation_dict[ticker]
-                            log(f"Buy signal for {ticker}: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
-
-                    elif bb_lower and current_close < bb_lower and current_rsi < 30 and current_adx > 45:
-                        investment_per_stock = self.account_balance / len(self.tickers)
-                        if investment_per_stock <= self.account_balance:
-                            allocation_dict[ticker] = investment_per_stock / current_close
-                            self.account_balance -= investment_per_stock
-                            self.entry_prices[ticker] = current_close
-                            self.holding_dict[ticker] += allocation_dict[ticker]
-                            log(f"Buy signal for {ticker}: Price below BB lower band, RSI < 30: Close={current_close}, BB Lower={bb_lower}, RSI={current_rsi}, EMA9={current_ema9}, EMA21={current_ema21}")
-
-                # Sell Conditions
-                if macd_line and signal_line and self.holding_dict[ticker] > 0:
-                    if current_signal > current_macd and previous_macd > previous_signal and current_rsi > 55:
-                        allocation_dict[ticker] = 0.0  # Sell the position
-                        self.account_balance += self.holding_dict[ticker] * current_close  # Add funds back to account balance
-                        log(f"Sell signal for {ticker}: Signal > MACD: MACD={current_macd}, Signal={current_signal}, EMA9={current_ema9}, EMA21={current_ema21}, RSI={current_rsi}, MFI={current_mfi}, ADX={current_adx}, CCI={current_cci}, ATR={current_atr}")
-                        self.holding_dict[ticker] = 0  # Reset holding
-
-                    elif bb_upper and current_close > bb_upper and current_rsi > 80 and current_adx > 45:
-                        allocation_dict[ticker] = 0.0
-                        self.account_balance += self.holding_dict[ticker] * current_close
-                        log(f"Sell signal for {ticker}: Price above BB upper band, RSI > 70, ATR > 0.7 or ADX > 70: Close={current_close}, BB Upper={bb_upper}, RSI={current_rsi}, ATR={current_atr}, ADX={current_adx}, EMA9={current_ema9}, EMA21={current_ema21}")
-                        self.holding_dict[ticker] = 0
-
-                    # Stop-loss condition: Liquidate if price drops below entry price by 1 ATR
-                    if current_close < self.entry_prices[ticker] - current_atr:
-                        allocation_dict[ticker] = 0.0  # Liquidate position
-                        self.account_balance += self.holding_dict[ticker] * current_close
-                        log(f"Stop-loss triggered for {ticker}: Current price={current_close}, Entry price={self.entry_prices[ticker]}, ATR={current_atr}")
-                        self.holding_dict[ticker] = 0  # Reset holding
-
+                # Log all the indicators
+                log(f"Ticker: {ticker}, Close: {current_close}, MACD: {current_macd}, Signal: {current_signal}, EMA9: {current_ema9}, EMA21: {current_ema21}, "
+                f"RSI: {current_rsi}, ADX: {current_adx}, ATR: {current_atr}, CCI: {current_cci}, MFI: {current_mfi}, BB Lower: {bb_lower}, BB Upper: {bb_upper}")
         # Return target allocation to be used by the strategy
         return TargetAllocation(allocation_dict)
