@@ -6,7 +6,7 @@ from surmount.logging import log
 class TradingStrategy(Strategy):
     def __init__(self, initial_investment=2000):
         self.tickers = [
-            "AAPL", "AMZN", "META", "NFLX", "GOOG", "MSFT", "AMD", "SQ"
+            #"AAPL", "AMZN", "META", "NFLX", "GOOG", "MSFT", "AMD", "SQ"
             #"DIS", "HD", "WMT", "BIIB", "UNH", "SHOP", "AMGN", "PEP", "XOM", "JPM", "PG", "LMT", "NOC", "CRM", "DHR", "NOW", "QQQ", "SPY", "IWM"
         ]
 
@@ -55,7 +55,7 @@ class TradingStrategy(Strategy):
                 bb_upper = bb["upper"][-1] if bb and "upper" in bb else None
 
                 # Log all the indicators
-                log(f"Ticker: {ticker}, Close: {current_close}, MACD: {current_macd}, Signal: {current_signal}, EMA9: {current_ema9}, EMA21: {current_ema21}, "
+                log(f"Ticker: {ticker}, Close: {current_close}, Current MACD: {current_macd}, Current Signal: {current_signal}, Previous MACD: {previous_macd}, Previous Signal: {previous_signal}, EMA9: {current_ema9}, EMA21: {current_ema21}, "
                 f"RSI: {current_rsi}, ADX: {current_adx}, ATR: {current_atr}, CCI: {current_cci}, MFI: {current_mfi}, BB Lower: {bb_lower}, BB Upper: {bb_upper}")
         # Return target allocation to be used by the strategy
         return TargetAllocation(allocation_dict)
